@@ -48,7 +48,7 @@ async def start(
         )
         return
 
-    if message.chat.type != "group":
+    if message.chat.type not in {"group", "supergroup"}:
         return
 
     if not message.from_user:
@@ -85,7 +85,7 @@ async def stop(
         await message.answer("Ця команда доступна тільки в групах.")
         return
 
-    if message.chat.type != "group":
+    if message.chat.type not in {"group", "supergroup"}:
         return
 
     if not message.from_user:
