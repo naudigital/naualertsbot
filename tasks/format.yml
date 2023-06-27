@@ -1,0 +1,18 @@
+version: "3"
+
+tasks:
+  isort:
+    desc: Format the project with isort
+    cmds:
+      - poetry run isort airalertbot
+
+  black:
+    desc: Format the project with black
+    cmds:
+      - poetry run black airalertbot
+
+  default:
+    desc: Format the project
+    deps:
+      - isort
+      - black

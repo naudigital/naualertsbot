@@ -1,0 +1,40 @@
+[tool.poetry]
+name = "airalertbot"
+version = "0.1.0"
+description = ""
+authors = ["Stanislav <h3xcode@envs.net>"]
+license = "Apache-2.0"
+readme = "README.md"
+
+[tool.poetry.scripts]
+airalertbot = "airalertbot.__main__:poetry_main"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+aiogram = { version = "^3.0.0b7", allow-prereleases = true }
+aiohttp = "^3.8.4"
+redis = {extras = ["hiredis"], version = "^4.5.5"}
+dependency-injector = "^4.41.0"
+python-dotenv = "^1.0.0"
+coloredlogs = "^15.0.1"
+openapi3 = "^1.8.0"
+pydantic = "^1.10.9"
+pytz = "^2023.3"
+
+[tool.poetry.group.dev.dependencies]
+black = "^22.10.0"
+isort = "^5.10.1"
+mypy = "^1.0.0"
+wemake-python-styleguide = { git = "https://github.com/wemake-services/wemake-python-styleguide.git" }
+pre-commit = "^2.20.0"
+flake8 = "^6.0.0"
+types-redis = "^4.5.5.2"
+types-pytz = "^2023.3.0.0"
+types-pyyaml = "^6.0.12.10"
+
+[tool.isort]
+profile = "black"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

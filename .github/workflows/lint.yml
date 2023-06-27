@@ -1,0 +1,23 @@
+name: Lint
+
+on: [push, pull_request]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install poetry
+        uses: snok/install-poetry@v1
+
+      - name: Install Task
+        uses: arduino/setup-task@v1
+
+      - name: Install dependencies
+        run: |
+          poetry install --no-root
+
+      - name: Lint
+        run: |
+          task lint

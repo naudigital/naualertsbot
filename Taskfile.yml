@@ -1,0 +1,11 @@
+version: "3"
+
+includes:
+  lint: tasks/lint.yml
+  format: tasks/format.yml
+
+tasks:
+  build:
+    desc: Build the project
+    cmds:
+      - poetry build --format wheel

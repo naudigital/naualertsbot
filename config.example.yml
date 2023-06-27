@@ -1,0 +1,18 @@
+bot:
+  token: TOKEN
+  admins:
+    - 1234567890
+
+db:
+  redis_url: redis://redis:6379/0
+
+services:
+  alerts:
+    base_url: https://api.example.com/
+    secret: 1234567890abcdefg
+    region: 31
+
+http:
+  base_url: https://bots.example.com/airalert/
+  host: 127.0.0.1
+  port: 8080

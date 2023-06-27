@@ -1,0 +1,30 @@
+version: "3"
+
+tasks:
+  flake8:
+    desc: Lint the project with flake8
+    cmds:
+      - poetry run flake8 --benchmark --statistics airalertbot
+
+  mypy:
+    desc: Lint the project with mypy
+    cmds:
+      - poetry run mypy --config-file mypy.ini airalertbot
+
+  isort:
+    desc: Lint the project with isort
+    cmds:
+      - poetry run isort --check-only --diff airalertbot
+
+  black:
+    desc: Lint the project with black
+    cmds:
+      - poetry run black --check --diff airalertbot
+
+  default:
+    desc: Lint the project
+    deps:
+      - flake8
+      - mypy
+      - isort
+      - black
