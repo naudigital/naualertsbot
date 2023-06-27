@@ -46,9 +46,10 @@ async def bootstrap() -> NoReturn:
     container = Container()
     container.config.from_yaml(args.config)
 
-    if container.config.sentry_dsn:
+    if container.config.get("sentry_dsn"):
+        logger.info("Initializing Sentry")
         sentry_sdk.init(
-            cast(str, container.config.sentry_dsn),
+            cast(str, container.config.get("sentry_dsn")),
             integrations=[
                 AioHttpIntegration(),
                 RedisIntegration(),
