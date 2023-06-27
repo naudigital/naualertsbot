@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "airalertbot"
-version = "0.1.2"
+version = "0.1.3"
 description = ""
 authors = ["Stanislav <h3xcode@envs.net>"]
 license = "Apache-2.0"
@@ -20,6 +20,7 @@ coloredlogs = "^15.0.1"
 openapi3 = "^1.8.0"
 pydantic = "^1.10.9"
 pytz = "^2023.3"
+sentry-sdk = "^1.26.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^22.10.0"
