@@ -2,6 +2,7 @@ import asyncio
 from json.decoder import JSONDecodeError
 from logging import getLogger
 from typing import TYPE_CHECKING, Any, cast
+from urllib.parse import urljoin, urlparse
 
 from aiohttp import ClientSession, web
 from dependency_injector.wiring import Provide, inject
@@ -27,6 +28,7 @@ class AlertsService:  # noqa: WPS306
     def __init__(
         self: "AlertsService",
         base_url: str,
+        api_token: str,
         region: int,
         secret: str,
     ) -> None:
@@ -34,13 +36,18 @@ class AlertsService:  # noqa: WPS306
 
         Args:
             base_url: Base URL for API.
+            api_token: API token.
             region: Region ID.
             secret: Secret for webhook.
         """
         self._loop = asyncio.get_event_loop()
-        self._session = ClientSession(base_url=base_url)
+        self._session = ClientSession(
+            base_url=base_url,
+            headers={"Authorization": api_token},
+        )
         self.region = region
-        self._webhook_path = f"/webhook/alerts/{secret}"
+        self._secret = secret
+        self._webhook_path: str | None = None
         self._queue = asyncio.Queue()
         self._shutting_down = False
 
@@ -53,12 +60,25 @@ class AlertsService:  # noqa: WPS306
 
         Args:
             app: Application instance.
-            base_url: Base URL for API.
+            base_url: Base URL for application.
         """
-        # append random data to webhook path for security reasons
+        # check if base_url has path
+        rpath = f"/webhook/alerts/{self._secret}"
+        parsed_url = urlparse(base_url)
+        if parsed_url.path:
+            # if base_url has path, append webhook path to it
+            self._webhook_path = parsed_url.path + rpath
+            parsed_url = parsed_url._replace(path=self._webhook_path)  # noqa: WPS437
+            full_url = parsed_url.geturl()
+        else:
+            # if base_url has no path, use webhook path as is
+            self._webhook_path = rpath
+            full_url = urljoin(base_url, self._webhook_path)
+
+        logger.debug("Listening at webhook path: %s", self._webhook_path)
         app.router.add_post(self._webhook_path, self._handle_webhook)
 
-        await self._setup_webhook(f"{base_url}{self._webhook_path}")
+        await self._setup_webhook(full_url)
 
     @property
     def qsize(self: "AlertsService") -> int:
@@ -103,7 +123,8 @@ class AlertsService:  # noqa: WPS306
         """Shutdown service."""
         self._shutting_down = True
         self._queue.put_nowait(None)
-        await self._remove_webhook(self._webhook_path)
+        if self._webhook_path:
+            await self._remove_webhook(self._webhook_path)
         await self._session.close()
 
         await self._queue.join()
@@ -149,11 +170,11 @@ class AlertsService:  # noqa: WPS306
     ) -> Any:
         logger.debug("Making request: %s %s (%s)", method, url, kwargs)
         async with self._session.request(method, url, **kwargs) as response:
+            logger.debug("Got response: %s", response.status)
+            if not ignore_errors:
+                response.raise_for_status()
             if not ignore_response:
-                json_data = await response.json()
-                if not ignore_errors:
-                    response.raise_for_status()
-                return json_data
+                return await response.json()
             await response.read()
 
     async def _setup_webhook(self: "AlertsService", url: str) -> None:

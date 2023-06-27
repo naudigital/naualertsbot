@@ -8,11 +8,12 @@ db:
 
 services:
   alerts:
-    base_url: https://api.example.com/
+    base_url: https://api.ukrainealarm.com/
+    api_token: 1234567890abcdefg
     secret: 1234567890abcdefg
     region: 31
 
 http:
-  base_url: https://bots.example.com/airalert/
+  base_url: https://bots.example.com/airalert
   host: 127.0.0.1
   port: 8080

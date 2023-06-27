@@ -12,6 +12,7 @@ class Services(containers.DeclarativeContainer):
     alerts = providers.Singleton(
         alerts.AlertsService,
         base_url=config.alerts.base_url,
+        api_token=config.alerts.api_token,
         region=config.alerts.region,
         secret=config.alerts.secret,
     )
