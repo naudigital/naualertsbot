@@ -1,13 +1,12 @@
 import asyncio
 from logging import getLogger
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any
 
-import pytz
-import yaml
 from aiogram import types
 from dependency_injector.wiring import Provide, inject
 
 from airalertbot.models import Alert, Status
+from airalertbot.texts import get_text
 
 if TYPE_CHECKING:
     from aiogram import Bot
@@ -18,36 +17,7 @@ if TYPE_CHECKING:
 
 logger = getLogger(__name__)
 
-texts: dict[str, dict[Literal["activate"] | Literal["deactivate"], str]]
-
-with open("assets/texts.yaml") as texts_file:
-    texts = yaml.safe_load(texts_file)
-
-
-def get_text(model: "Alert") -> str:
-    """Get text for alert.
-
-    Args:
-        model: Alert model.
-
-    Returns:
-        Text for alert.
-    """
-    # convert datetime to UTC+3 timezone
-    utcmoment_naive = model.created_at
-    utcmoment = utcmoment_naive.replace(tzinfo=pytz.utc)
-    local_datetime = utcmoment.astimezone(pytz.timezone("Europe/Kiev"))
-
-    text = texts.get(model.alarm_type.value, {}).get(
-        model.status.value,
-        None,
-    )
-    if text is None:
-        text = texts["unknown"][model.status.value]
-
-    return text.format(
-        time=local_datetime.strftime("%H:%M:%S"),
-    )
+IMGFILE = types.FSInputFile("assets/map.jpg")
 
 
 class WorkerService:  # noqa: WPS306
@@ -57,7 +27,6 @@ class WorkerService:  # noqa: WPS306
         self: "WorkerService",
     ) -> None:
         """Initialize service."""
-        self._imgfile = types.FSInputFile("assets/map.jpg")
         self._shutting_down = False
 
     async def run(  # noqa: WPS213, WPS231
@@ -126,7 +95,7 @@ class WorkerService:  # noqa: WPS306
             if alert.status == Status.ACTIVATE:
                 await bot.send_photo(
                     chat_id,
-                    self._imgfile,
+                    IMGFILE,
                     caption=text,
                 )
             else:
