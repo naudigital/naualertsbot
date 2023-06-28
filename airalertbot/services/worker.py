@@ -103,3 +103,4 @@ class WorkerService:  # noqa: WPS306
                     chat_id,
                     text,
                 )
+            await asyncio.sleep(0.5)
