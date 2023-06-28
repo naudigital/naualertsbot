@@ -2,6 +2,7 @@ import argparse
 import asyncio
 import os
 import sys
+from importlib.metadata import version
 from logging import getLogger
 from typing import NoReturn, cast
 
@@ -37,6 +38,7 @@ async def bootstrap() -> NoReturn:
     args = parser.parse_args(sys.argv[1:])
     coloredlogs.install(level=args.log_level)  # type: ignore
 
+    logger.info("Running airalertbot version %s", version(__package__))
     logger.info("Loading config from %s", args.config)
 
     if not os.path.isfile(args.config):
