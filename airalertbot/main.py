@@ -67,6 +67,8 @@ async def load_alerts_state(
         except (ValidationError, TypeError):
             logger.warning("Invalid alert in Redis: %s", alert)
 
+    await redis.delete("alerts")
+
 
 @inject
 async def main(  # noqa: WPS210, WPS213
