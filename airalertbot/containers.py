@@ -14,7 +14,6 @@ class Services(containers.DeclarativeContainer):
         base_url=config.alerts.base_url,
         api_token=config.alerts.api_token,
         region=config.alerts.region,
-        secret=config.alerts.secret,
     )
     worker = providers.Singleton(worker.WorkerService)
 

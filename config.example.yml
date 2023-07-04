@@ -10,7 +10,6 @@ services:
   alerts:
     base_url: https://api.ukrainealarm.com/
     api_token: 1234567890abcdefg
-    secret: 1234567890abcdefg
     region: 31
 
 http:

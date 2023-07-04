@@ -1,4 +1,5 @@
 import asyncio
+import os
 from json.decoder import JSONDecodeError
 from logging import getLogger
 from typing import TYPE_CHECKING, Any, cast
@@ -30,7 +31,6 @@ class AlertsService:  # noqa: WPS306
         base_url: str,
         api_token: str,
         region: int,
-        secret: str,
     ) -> None:
         """Initialize service.
 
@@ -38,7 +38,6 @@ class AlertsService:  # noqa: WPS306
             base_url: Base URL for API.
             api_token: API token.
             region: Region ID.
-            secret: Secret for webhook.
         """
         self._loop = asyncio.get_event_loop()
         self._session = ClientSession(
@@ -46,7 +45,7 @@ class AlertsService:  # noqa: WPS306
             headers={"Authorization": api_token},
         )
         self.region = region
-        self._secret = secret
+        self._secret = os.urandom(RANDOM_SALT_LENGTH).hex()
         self._webhook_path: str | None = None
         self._queue = asyncio.Queue()
         self._shutting_down = False
