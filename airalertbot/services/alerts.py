@@ -25,6 +25,7 @@ class AlertsService:  # noqa: WPS306
 
     _queue: asyncio.Queue[models.Alert | None]
     region: int
+    _previous_alert: models.Alert | None
 
     def __init__(
         self: "AlertsService",
@@ -49,6 +50,7 @@ class AlertsService:  # noqa: WPS306
         self._webhook_path: str | None = None
         self._queue = asyncio.Queue()
         self._shutting_down = False
+        self._previous_alert = None
 
     async def setup_for_app(
         self: "AlertsService",
@@ -148,6 +150,10 @@ class AlertsService:  # noqa: WPS306
             return web.json_response({"status": "error"}, status=400)  # noqa: WPS432
 
         if model.region_id == self.region:
+            if self._previous_alert and model == self._previous_alert:
+                logger.debug("Ignoring duplicate alert: %s", model)
+                return web.json_response({"status": "ok"})
+            self._previous_alert = model
             self._queue.put_nowait(model)
         else:
             logger.debug(
