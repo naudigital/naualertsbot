@@ -33,7 +33,7 @@ def get_text(model: "Alert", previous_model: "Alert | None") -> str:
     if alarm_status == "deactivate" and previous_model is not None:
         alarm_status = "deactivate_with_duration"
         duration_timedelta = model.created_at - previous_model.created_at
-        duration = str(duration_timedelta)
+        duration = str(duration_timedelta).split(".")[0]
 
     text = texts.get(model.alarm_type.value, {}).get(
         alarm_status,
