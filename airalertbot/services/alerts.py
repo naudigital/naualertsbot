@@ -1,5 +1,6 @@
 import asyncio
 import os
+from collections import deque
 from json.decoder import JSONDecodeError
 from logging import getLogger
 from typing import TYPE_CHECKING, Any, cast
@@ -25,7 +26,7 @@ class AlertsService:  # noqa: WPS306
 
     _queue: asyncio.Queue[models.Alert | None]
     region: int
-    _previous_alert: models.Alert | None
+    _previous_alerts: deque[models.Alert]
 
     def __init__(
         self: "AlertsService",
@@ -50,7 +51,7 @@ class AlertsService:  # noqa: WPS306
         self._webhook_path: str | None = None
         self._queue = asyncio.Queue()
         self._shutting_down = False
-        self._previous_alert = None
+        self._previous_alerts = deque(maxlen=2)
 
     async def setup_for_app(
         self: "AlertsService",
@@ -90,6 +91,15 @@ class AlertsService:  # noqa: WPS306
         """
         return self._queue.qsize()
 
+    @property
+    def previous_alert(self: "AlertsService") -> models.Alert | None:
+        """Previous alert.
+
+        Returns:
+            Previous alert.
+        """
+        return self._previous_alerts[1] if len(self._previous_alerts) > 1 else None
+
     async def wait_alert(self: "AlertsService") -> models.Alert | None:
         """Wait for alerts from API.
 
@@ -118,6 +128,7 @@ class AlertsService:  # noqa: WPS306
         Args:
             alert: Alert to trigger.
         """
+        self._previous_alerts.appendleft(alert)
         self._queue.put_nowait(alert)
 
     async def shutdown(self: "AlertsService") -> None:
@@ -150,10 +161,10 @@ class AlertsService:  # noqa: WPS306
             return web.json_response({"status": "error"}, status=400)  # noqa: WPS432
 
         if model.region_id == self.region:
-            if self._previous_alert and model == self._previous_alert:
+            if self._previous_alerts and model == self._previous_alerts[0]:
                 logger.debug("Ignoring duplicate alert: %s", model)
                 return web.json_response({"status": "ok"})
-            self._previous_alert = model
+            self._previous_alerts.appendleft(model)
             self._queue.put_nowait(model)
         else:
             logger.debug(

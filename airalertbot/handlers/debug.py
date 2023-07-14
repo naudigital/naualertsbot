@@ -20,6 +20,13 @@ logger = getLogger(__name__)
 router = Router()
 IMGFILE = types.FSInputFile("assets/map.jpg")
 
+DEBUG_PUSH_ALLOWED = True
+
+if DEBUG_PUSH_ALLOWED:
+    debug_types = {"push", "message"}
+else:
+    debug_types = {"message"}
+
 
 @router.message(Command("trigger"))
 @inject
@@ -43,12 +50,33 @@ async def trigger(
     if message.from_user.id not in cast(list[int], config["admins"]):
         return
 
-    if not message.text or len(message.text.split(" ")) != 3:
+    if not message.text:
+        return
+
+    args = message.text.split(" ")
+
+    if len(args) != 4:
         await message.answer("Неправильний формат команди")
         return
 
-    alert_status = message.text.split(" ")[1]
-    alarm_type = message.text.split(" ")[2]
+    alert_status = args[1]
+    alarm_type = args[2]
+    debug_type = args[3]
+
+    if debug_type not in debug_types:
+        await message.answer("Invalid debug type")
+        return
+
+    if debug_type == "push":
+        await alerts_service.trigger_alert(
+            Alert(
+                status=Status(alert_status),
+                regionId=alerts_service.region,
+                alarmType=AlarmType(alarm_type),
+                createdAt=datetime.utcnow(),
+            ),
+        )
+        return
 
     try:
         alert = Alert(
@@ -65,10 +93,10 @@ async def trigger(
         await bot.send_photo(
             message.chat.id,
             IMGFILE,
-            caption=get_text(alert),
+            caption=get_text(alert, None),
         )
     else:
         await bot.send_message(
             message.chat.id,
-            get_text(alert),
+            get_text(alert, None),
         )

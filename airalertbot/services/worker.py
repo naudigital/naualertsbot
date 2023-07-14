@@ -47,7 +47,7 @@ class WorkerService:  # noqa: WPS306
                 break
 
             logger.info("Got alert: %s", alert)
-            await self._send_alert(alert)
+            await self._send_alert(alert, alerts_service.previous_alert)
             alerts_service.processing_done()
 
         if alerts_service.qsize < 1:
@@ -65,7 +65,7 @@ class WorkerService:  # noqa: WPS306
                 continue
 
             logger.info("Got alert: %s", alert)
-            await self._send_alert(alert)
+            await self._send_alert(alert, alerts_service.previous_alert)
             alerts_service.processing_done()
 
         logger.info("Worker stopped")
@@ -79,6 +79,7 @@ class WorkerService:  # noqa: WPS306
     async def _send_alert(
         self: "WorkerService",
         alert: "Alert",
+        previous_alert: "Alert | None",
         redis: "Redis[Any]" = Provide["db.redis"],
         bot: "Bot" = Provide["bot_context.bot"],
     ) -> None:
@@ -86,10 +87,11 @@ class WorkerService:  # noqa: WPS306
 
         Args:
             alert: Alert instance.
+            previous_alert: Previous alert instance.
             redis: Redis client instance.
             bot: Bot instance.
         """
-        text = get_text(alert)
+        text = get_text(alert, previous_alert)
 
         for chat_id in await redis.smembers("subscribers"):
             if alert.status == Status.ACTIVATE:
