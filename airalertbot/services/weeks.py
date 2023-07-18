@@ -69,7 +69,7 @@ class WeeksService:  # noqa: WPS306
     @inject
     async def get_week_number(
         self: "WeeksService",
-        redis: "Redis[Any]" = Provide["redis"],
+        redis: "Redis[Any]" = Provide["db.redis"],
     ) -> WeekNumber:
         """Get current week number.
 
@@ -90,7 +90,7 @@ class WeeksService:  # noqa: WPS306
     @inject
     async def toggle_invert(
         self: "WeeksService",
-        redis: "Redis[Any]" = Provide["redis"],
+        redis: "Redis[Any]" = Provide["db.redis"],
     ) -> bool:
         """Toggle invert weeks.
 
@@ -114,7 +114,7 @@ class WeeksService:  # noqa: WPS306
         self: "WeeksService",
         week_number: WeekNumber,
         bot: "Bot" = Provide["bot_context.bot"],
-        redis: "Redis[Any]" = Provide["redis"],
+        redis: "Redis[Any]" = Provide["db.redis"],
     ) -> None:
         text = (
             f"❇️ Починається {week_number.value}-й тиждень\n"
