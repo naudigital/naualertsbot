@@ -20,6 +20,18 @@ router = Router()
 CALENDAR_FILE = types.FSInputFile("assets/calendar.jpg")
 
 
+async def delete_delayed(messages: list[types.Message], delay: int) -> None:
+    """Delete messages after delay.
+
+    Args:
+        messages: List of messages to delete.
+        delay: Delay in seconds.
+    """
+    await asyncio.sleep(delay)
+    for message in messages:
+        await message.delete()
+
+
 @router.message(Command("week"))
 @inject
 async def getweek(
@@ -82,9 +94,7 @@ async def getweek(
             "• 6 пара - 17.10 - 18.45\n",
         )
 
-    await asyncio.sleep(60)
-    await message.delete()
-    await response.delete()
+    asyncio.ensure_future(delete_delayed([message, response], 60))
 
 
 @router.message(Command("calendar"))
@@ -117,9 +127,7 @@ async def getcalendar(
         caption="📅 <b>Календар II семестру 2022-2023 навчального року</b>",
     )
 
-    await asyncio.sleep(60)
-    await message.delete()
-    await response.delete()
+    asyncio.ensure_future(delete_delayed([message, response], 60))
 
 
 @router.message(Command("invert_weeks"))
