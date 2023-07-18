@@ -2,7 +2,8 @@
 max-line-length = 100
 ignore =
     Q000, D100, D101, WPS404, WPS326, WPS305,
-    WPS412, D105, WPS323, WPS226, WPS115
+    WPS412, D105, WPS323, WPS226, WPS115,
+    WPS237, WPS473
 max-awaits = 10
 max-arguments = 10
 max-methods = 15

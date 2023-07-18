@@ -1,5 +1,5 @@
 from datetime import datetime
-from enum import StrEnum
+from enum import IntEnum, StrEnum
 from typing import Optional, Type
 
 from pydantic import BaseModel, Field
@@ -51,3 +51,18 @@ class Alert(BaseModel):
     region_id: int = Field(alias="regionId")
     alarm_type: AlarmType = Field(alias="alarmType")
     created_at: datetime = Field(alias="createdAt")
+
+
+class WeekNumber(IntEnum):
+    FIRST = 1
+    SECOND = 2
+
+    def invert(self: "WeekNumber") -> "WeekNumber":
+        """Invert week number.
+
+        Returns:
+            Inverted week number.
+        """
+        if self == WeekNumber.FIRST:
+            return WeekNumber.SECOND
+        return WeekNumber.FIRST
