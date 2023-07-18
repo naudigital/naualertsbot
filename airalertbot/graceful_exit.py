@@ -145,7 +145,7 @@ class GracefulExitManager:  # noqa: WPS306
             context: Exception context.
         """
         exception = context.get("exception")
-        logger.critical("Unhandled exception: %s", exception)
+        logger.exception("Unhandled exception", exc_info=exception)
 
     async def _call_exit_callbacks(self: "GracefulExitManager") -> None:
         for exit_cb in self._exit_cbs:
