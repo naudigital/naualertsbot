@@ -17,6 +17,7 @@ if TYPE_CHECKING:
 
     from airalertbot.containers import Container
     from airalertbot.services.alerts import AlertsService
+    from airalertbot.services.weeks import WeeksService
     from airalertbot.services.worker import WorkerService
 
 
@@ -77,6 +78,7 @@ async def main(  # noqa: WPS210, WPS213
     container: "Container" = Provide["cself"],
     alert_service: "AlertsService" = Provide["services.alerts"],
     worker_service: "WorkerService" = Provide["services.worker"],
+    weeks_service: "WeeksService" = Provide["services.weeks"],
 ) -> NoReturn:
     """Run application.
 
@@ -86,6 +88,7 @@ async def main(  # noqa: WPS210, WPS213
         container: Container instance.
         alert_service: Alert service instance.
         worker_service: Worker service instance.
+        weeks_service: Weeks service instance.
     """
     logger.info("Initializing services")
     await services.init()
@@ -117,17 +120,24 @@ async def main(  # noqa: WPS210, WPS213
         name="worker",
     )
 
+    weeks_task = asyncio.create_task(
+        weeks_service.run(),
+        name="weeks",
+    )
+
     loop = asyncio.get_event_loop()
 
     manager = GracefulExitManager(container, loop)
 
     manager.add_exit_callback(app.shutdown)
+    manager.add_exit_callback(weeks_service.shutdown)
     manager.add_exit_callback(worker_service.shutdown)
     manager.add_exit_callback(alert_service.shutdown)
     manager.add_exit_callback(save_alerts_state)
 
     manager.track_task(worker_task, cancel_on_exit=False)
     manager.track_task(server_task)
+    manager.track_task(weeks_task)
 
     manager.setup_signal_handlers()
 

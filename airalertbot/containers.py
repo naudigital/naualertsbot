@@ -3,7 +3,7 @@ from aiohttp import web
 from dependency_injector import containers, providers
 
 from airalertbot.db import init_redis
-from airalertbot.services import alerts, worker
+from airalertbot.services import alerts, weeks, worker
 
 
 class Services(containers.DeclarativeContainer):
@@ -16,6 +16,7 @@ class Services(containers.DeclarativeContainer):
         region=config.alerts.region,
     )
     worker = providers.Singleton(worker.WorkerService)
+    weeks = providers.Singleton(weeks.WeeksService)
 
 
 class Databases(containers.DeclarativeContainer):

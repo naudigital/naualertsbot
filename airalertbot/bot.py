@@ -61,5 +61,13 @@ async def init(
         [
             types.BotCommand(command="/start", description="Підписатися на сповіщення"),
             types.BotCommand(command="/stop", description="Відписатися від сповіщень"),
+            types.BotCommand(
+                command="/week",
+                description="Переглянути поточний тиждень",
+            ),
+            types.BotCommand(
+                command="/calendar",
+                description="Переглянути календар семестру",
+            ),
         ],
     )
