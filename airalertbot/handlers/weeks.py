@@ -54,8 +54,7 @@ async def getweek(
         )
         if not participant.can_delete_messages:
             await message.answer(
-                "❌ <b>Помилка!</b>\n"
-                "Бот не має достатніх прав для видалення повідомлень.",
+                "❌ <b>Помилка!</b>\nБот не має права для видалення повідомлень.",
             )
             return
 
@@ -117,8 +116,7 @@ async def getcalendar(
         )
         if not participant.can_delete_messages:
             await message.answer(
-                "❌ <b>Помилка!</b>\n"
-                "Бот не має достатніх прав для видалення повідомлень.",
+                "❌ <b>Помилка!</b>\nБот не має права для видалення повідомлень.",
             )
             return
 
