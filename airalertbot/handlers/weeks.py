@@ -78,7 +78,7 @@ async def getweek(
     elif weekday in {5, 6}:
         response = await message.answer(
             f"📒 <b>Закінчується {week_number.value}-й тиждень.</b>\n"
-            f"З понеділка - f{week_number.invert().value}-й.",
+            f"З понеділка - {week_number.invert().value}-й.",
         )
     else:
         response = await message.answer(
