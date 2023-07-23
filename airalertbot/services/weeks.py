@@ -3,6 +3,7 @@ from datetime import datetime
 from logging import getLogger
 from typing import TYPE_CHECKING, Any
 
+import pytz
 from dependency_injector.wiring import Provide, inject
 
 from airalertbot.models import WeekNumber
@@ -13,6 +14,15 @@ if TYPE_CHECKING:
 
 
 logger = getLogger(__name__)
+
+
+def get_current_date() -> datetime:
+    """Get current date.
+
+    Returns:
+        Current date.
+    """
+    return datetime.now(pytz.timezone("Europe/Kiev"))
 
 
 def get_week_number(date: datetime) -> int:
@@ -52,9 +62,9 @@ class WeeksService:  # noqa: WPS306
         """Run service."""
         logger.info("Waiting for new week")
 
-        last_week_number = get_week_number(datetime.now())
+        last_week_number = get_week_number(get_current_date())
         while not self._shutting_down:
-            date = datetime.now()
+            date = get_current_date()
             week_number = get_week_number(date)
             if week_number != last_week_number:
                 await self._send_week(await self.get_week_number())
@@ -85,7 +95,7 @@ class WeeksService:  # noqa: WPS306
         else:
             invert = bool(int(invert))
 
-        return get_studying_week_number(datetime.now(), invert)
+        return get_studying_week_number(get_current_date(), invert)
 
     @inject
     async def toggle_invert(
