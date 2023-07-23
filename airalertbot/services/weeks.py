@@ -138,5 +138,5 @@ class WeeksService:  # noqa: WPS306
             "• 5 пара - 15.20 - 16.55\n"
             "• 6 пара - 17.10 - 18.45\n"
         )
-        for chat_id in await redis.smembers("subscribers"):
+        for chat_id in await redis.smembers("subscribers:weeks"):
             await bot.send_message(chat_id, text)

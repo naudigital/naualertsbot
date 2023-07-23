@@ -17,6 +17,25 @@ logger = getLogger(__name__)
 router = Router()
 
 
+@inject
+async def _is_subscribed(
+    chat: types.Chat,
+    redis: "Redis[Any]" = Provide["db.redis"],
+) -> bool:
+    """Check if chat is subscribed to bot.
+
+    Args:
+        chat: Chat instance.
+        redis: Redis instance.
+
+    Returns:
+        True if chat is subscribed to bot.
+    """
+    subscribed_to_alerts = await redis.sismember("subscribers:alerts", chat.id)
+    subscribed_to_weeks = await redis.sismember("subscribers:weeks", chat.id)
+    return subscribed_to_alerts or subscribed_to_weeks
+
+
 @router.message(Command("start"))
 @inject
 async def start(
@@ -66,7 +85,7 @@ async def start(
     if chat_member.status not in {"administrator", "creator"}:
         return
 
-    if await redis.sismember("subscribers", message.chat.id):
+    if await _is_subscribed(message.chat):
         await message.answer(
             "❌ <b>Помилка!</b>\n"
             "Ви вже підписані на розсилку бота. Щоб відписатись, використовуйте "
@@ -74,9 +93,13 @@ async def start(
         )
         return
 
-    await redis.sadd("subscribers", message.chat.id)
+    await redis.sadd("subscribers:alerts", message.chat.id)
+    await redis.sadd("subscribers:weeks", message.chat.id)
 
-    text = "🎉 <b>Успішно!</b> Щоб відписатись від розсилки використовуйте /stop.\n\n"
+    text = (
+        "🎉 <b>Успішно!</b> Щоб налаштувати сповіщення використовуйте /settings.\n"
+        "Відписатись від розсилки - /stop.\n\n"
+    )
     participant = await bot.get_chat_member(
         message.chat.id,
         (await bot.me()).id,
@@ -121,8 +144,9 @@ async def stop(
     if chat_member.status not in {"administrator", "creator"}:
         return
 
-    if await redis.sismember("subscribers", message.chat.id):
-        await redis.srem("subscribers", message.chat.id)
+    if await _is_subscribed(message.chat, redis):
+        await redis.srem("subscribers:alerts", message.chat.id)
+        await redis.srem("subscribers:weeks", message.chat.id)
         await message.answer(
             "✅ <b>Ви відписались від розсилки!</b> Щоб підписатись, "
             "використовуйте команду /start.",
@@ -156,5 +180,6 @@ async def group_leave(
     if message.left_chat_member.id != (await bot.me()).id:
         return
 
-    await redis.srem("subscribers", message.chat.id)
+    await redis.srem("subscribers:alerts", message.chat.id)
+    await redis.srem("subscribers:weeks", message.chat.id)
     logger.info("Bot was removed from group %s", message.chat.id)

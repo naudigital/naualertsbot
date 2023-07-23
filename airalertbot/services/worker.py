@@ -93,7 +93,7 @@ class WorkerService:  # noqa: WPS306
         """
         text = get_text(alert, previous_alert)
 
-        for chat_id in await redis.smembers("subscribers"):
+        for chat_id in await redis.smembers("subscribers:alerts"):
             if alert.status == Status.ACTIVATE:
                 await bot.send_photo(
                     chat_id,
