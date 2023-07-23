@@ -4,9 +4,11 @@ from logging import getLogger
 from typing import TYPE_CHECKING, Any
 
 import pytz
+from aiogram.exceptions import TelegramMigrateToChat
 from dependency_injector.wiring import Provide, inject
 
 from airalertbot.models import WeekNumber
+from airalertbot.stats import migrate_chat
 
 if TYPE_CHECKING:
     from aiogram import Bot
@@ -139,4 +141,12 @@ class WeeksService:  # noqa: WPS306
             "• 6 пара - 17.10 - 18.45\n"
         )
         for chat_id in await redis.smembers("subscribers:weeks"):
-            await bot.send_message(chat_id, text)
+            try:
+                await bot.send_message(chat_id, text)
+            except TelegramMigrateToChat as err:
+                logger.info("Chat %s migrated to %s", chat_id, err.migrate_to_chat_id)
+                await migrate_chat(chat_id, err.migrate_to_chat_id)
+                await redis.srem("subscribers:weeks", chat_id)
+                await redis.sadd("subscribers:weeks", err.migrate_to_chat_id)
+                await bot.send_message(err.migrate_to_chat_id, text)
+            await asyncio.sleep(0.5)

@@ -3,9 +3,11 @@ from logging import getLogger
 from typing import TYPE_CHECKING, Any
 
 from aiogram import types
+from aiogram.exceptions import TelegramMigrateToChat
 from dependency_injector.wiring import Provide, inject
 
 from airalertbot.models import Alert, Status
+from airalertbot.stats import migrate_chat
 from airalertbot.texts import get_text
 
 if TYPE_CHECKING:
@@ -94,15 +96,44 @@ class WorkerService:  # noqa: WPS306
         text = get_text(alert, previous_alert)
 
         for chat_id in await redis.smembers("subscribers:alerts"):
-            if alert.status == Status.ACTIVATE:
-                await bot.send_photo(
-                    chat_id,
-                    IMGFILE,
-                    caption=text,
-                )
-            else:
-                await bot.send_message(
-                    chat_id,
+            try:
+                await self._send_alert_to_chat(chat_id, text, alert.status)
+            except TelegramMigrateToChat as err:
+                logger.info("Chat %s migrated to %s", chat_id, err.migrate_to_chat_id)
+                await migrate_chat(chat_id, err.migrate_to_chat_id)
+                await redis.srem("subscribers:alerts", chat_id)
+                await redis.sadd("subscribers:alerts", err.migrate_to_chat_id)
+                await self._send_alert_to_chat(
+                    err.migrate_to_chat_id,
                     text,
+                    alert.status,
                 )
             await asyncio.sleep(0.5)
+
+    @inject
+    async def _send_alert_to_chat(
+        self: "WorkerService",
+        chat_id: int,
+        text: str,
+        alert_status: Status,
+        bot: "Bot" = Provide["bot_context.bot"],
+    ) -> None:
+        """Send alert to chat.
+
+        Args:
+            chat_id: Chat id.
+            text: Alert text.
+            alert_status: Alert status.
+            bot: Bot instance.
+        """
+        if alert_status == Status.ACTIVATE:
+            await bot.send_photo(
+                chat_id,
+                IMGFILE,
+                caption=text,
+            )
+        else:
+            await bot.send_message(
+                chat_id,
+                text,
+            )

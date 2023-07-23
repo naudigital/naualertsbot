@@ -60,3 +60,24 @@ async def get_stats(
         stats_obj[int(key)] = ChatStats(**stats_dict)
 
     return stats_obj
+
+
+@inject
+async def migrate_chat(
+    old_chat_id: int,
+    new_chat_id: int,
+    redis: "Redis[Any]" = Provide["db.redis"],
+) -> None:
+    """Migrate chat stats to new chat id.
+
+    Args:
+        old_chat_id: Old chat id.
+        new_chat_id: New chat id.
+        redis: Redis instance.
+    """
+    await redis.hset(
+        "stats",
+        str(new_chat_id),
+        await redis.hget("stats", str(old_chat_id)) or "{}",
+    )
+    await redis.hdel("stats", str(old_chat_id))
