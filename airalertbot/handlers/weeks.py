@@ -9,6 +9,8 @@ from aiogram.exceptions import TelegramBadRequest
 from aiogram.filters import Command
 from dependency_injector.wiring import Provide, inject
 
+from airalertbot.stats import update_stats
+
 if TYPE_CHECKING:
     from aiogram import Bot
     from dependency_injector.providers import Configuration
@@ -50,6 +52,10 @@ async def getweek(
         weeks_service: Weeks service instance.
     """
     if message.chat.type != "private":
+        # update stats if chat is group or supergroup
+        if message.chat.type in {"group", "supergroup"}:
+            await update_stats(message.chat)
+
         # check if bot has delete message permission
         participant = await bot.get_chat_member(
             message.chat.id,
@@ -112,6 +118,10 @@ async def getcalendar(
         bot: Bot instance.
     """
     if message.chat.type != "private":
+        # update stats if chat is group or supergroup
+        if message.chat.type in {"group", "supergroup"}:
+            await update_stats(message.chat)
+
         # check if bot has delete message permission
         participant = await bot.get_chat_member(
             message.chat.id,

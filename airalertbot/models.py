@@ -66,3 +66,11 @@ class WeekNumber(IntEnum):
         if self == WeekNumber.FIRST:
             return WeekNumber.SECOND
         return WeekNumber.FIRST
+
+
+class ChatStats(BaseModel):
+    chat_id: int
+    name: str | None
+    username: str | None
+    members: int
+    admin_rights: bool

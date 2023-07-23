@@ -7,6 +7,7 @@ from aiogram.filters import Command
 from dependency_injector.wiring import Provide, inject
 
 from airalertbot.models import AlarmType, Alert, Status
+from airalertbot.stats import get_stats
 from airalertbot.texts import get_text
 
 if TYPE_CHECKING:
@@ -100,3 +101,39 @@ async def trigger(
             message.chat.id,
             get_text(alert, None),
         )
+
+
+@router.message(Command("stats"))
+@inject
+async def stats(
+    message: types.Message,
+    config: "Configuration" = Provide["bot_context.config"],
+) -> None:
+    """Get stats.
+
+    Args:
+        message: Message instance.
+        config: Bot configuration instance.
+    """
+    if not message.from_user:
+        return
+
+    if message.from_user.id not in cast(list[int], config["admins"]):
+        return
+
+    chat_stats = await get_stats()
+
+    lines: list[str] = []
+
+    for chat_stat in chat_stats.values():
+        lines.append(f"- <b>{chat_stat.name}</b> (<code>{chat_stat.chat_id}</code>): ")
+        lines.append(f"  | <b>Учасників:</b> <code>{chat_stat.members}</code>")
+        if chat_stat.username:
+            username = f"@{chat_stat.username}"
+        else:
+            username = "<i>немає</i>"
+        lines.append(f"  | <b>Нік:</b> {username}")
+        lines.append(f"  | <b>Адмін:</b> <code>{chat_stat.admin_rights}</code>")
+        lines.append("")
+
+    await message.answer("\n".join(lines))

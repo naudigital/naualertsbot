@@ -6,6 +6,8 @@ from aiogram import Router, types
 from aiogram.filters import Command
 from dependency_injector.wiring import Provide, inject
 
+from airalertbot.stats import update_stats
+
 if TYPE_CHECKING:
     from aiogram import Bot
     from redis.asyncio import Redis
@@ -53,6 +55,8 @@ async def start(
 
     if message.chat.type not in {"group", "supergroup"}:
         return
+
+    await update_stats(message.chat)
 
     if not message.from_user:
         return
@@ -107,6 +111,8 @@ async def stop(
 
     if message.chat.type not in {"group", "supergroup"}:
         return
+
+    await update_stats(message.chat)
 
     if not message.from_user:
         return
