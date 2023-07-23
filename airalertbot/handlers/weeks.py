@@ -1,9 +1,11 @@
 import asyncio
+from contextlib import suppress
 from datetime import datetime
 from logging import getLogger
 from typing import TYPE_CHECKING, cast
 
 from aiogram import Router, types
+from aiogram.exceptions import TelegramBadRequest
 from aiogram.filters import Command
 from dependency_injector.wiring import Provide, inject
 
@@ -29,7 +31,8 @@ async def delete_delayed(messages: list[types.Message], delay: int) -> None:
     """
     await asyncio.sleep(delay)
     for message in messages:
-        await message.delete()
+        with suppress(TelegramBadRequest):
+            await message.delete()
 
 
 @router.message(Command("week"))
