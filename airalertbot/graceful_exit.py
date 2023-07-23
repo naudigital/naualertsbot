@@ -105,7 +105,7 @@ class GracefulExitManager:  # noqa: WPS306
             )
 
             if self._exit_future in done:
-                await self._exit()
+                await self._exit(0)
 
             for task in cast(list[asyncio.Task[None]], done):
                 self._trackings.remove(task)
@@ -117,7 +117,7 @@ class GracefulExitManager:  # noqa: WPS306
                     )
                     if exit_on_failure:
                         logger.critical("Unrecoverable error. Exiting.")  # noqa: WPS220
-                        await self._exit()  # noqa: WPS220
+                        await self._exit(1)  # noqa: WPS220
                 else:
                     logger.info("Task '%s' finished", task.get_name())
 
@@ -207,8 +207,12 @@ class GracefulExitManager:  # noqa: WPS306
                     continue
             logger.debug("Task '%s' finished", done_task.get_name())
 
-    async def _exit(self: "GracefulExitManager") -> NoReturn:
-        """Exit application."""
+    async def _exit(self: "GracefulExitManager", status: int) -> NoReturn:
+        """Exit application.
+
+        Args:
+            status: Exit status.
+        """
         logger.info("Waiting for exit actions to complete")
         await self._call_exit_callbacks()
 
@@ -217,4 +221,4 @@ class GracefulExitManager:  # noqa: WPS306
 
         logger.info("Shutting down resources")
         await self._container.shutdown_resources()  # type: ignore
-        sys.exit(0)
+        sys.exit(status)
