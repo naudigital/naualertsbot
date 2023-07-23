@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "airalertbot"
-version = "0.3.1"
+version = "0.3.2"
 description = ""
 authors = ["Stanislav <h3xcode@envs.net>"]
 license = "Apache-2.0"
