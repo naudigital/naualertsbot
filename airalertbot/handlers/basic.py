@@ -97,7 +97,8 @@ async def start(
     await redis.sadd("subscribers:weeks", message.chat.id)
 
     text = (
-        "🎉 <b>Успішно!</b> Щоб налаштувати сповіщення використовуйте /settings.\n"
+        "🎉 <b>Успішно!</b>\n"
+        "Щоб налаштувати сповіщення використовуйте /settings.\n"
         "Відписатись від розсилки - /stop.\n\n"
     )
     participant = await bot.get_chat_member(
@@ -144,7 +145,7 @@ async def stop(
     if chat_member.status not in {"administrator", "creator"}:
         return
 
-    if await _is_subscribed(message.chat, redis):
+    if await _is_subscribed(message.chat):
         await redis.srem("subscribers:alerts", message.chat.id)
         await redis.srem("subscribers:weeks", message.chat.id)
         await message.answer(
