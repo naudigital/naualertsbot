@@ -21,7 +21,7 @@ logger = getLogger(__name__)
 router = Router()
 IMGFILE = types.FSInputFile("assets/map.jpg")
 
-DEBUG_PUSH_ALLOWED = True
+DEBUG_PUSH_ALLOWED = False
 
 if DEBUG_PUSH_ALLOWED:
     debug_types = {"push", "message"}
