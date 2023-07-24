@@ -7,7 +7,7 @@ services:
       - redis-data:/data
 
   app:
-    image: naualertsbot:latest
+    image: naualertsbot:${VERSION:-latest}
     command: [ "naualertsbot", "--config", "/config.yml" ]
     ports:
       - "8080:8080"
