@@ -69,5 +69,9 @@ async def init(
                 command="/calendar",
                 description="Переглянути календар семестру",
             ),
+            types.BotCommand(
+                command="/settings",
+                description="Налаштування сповіщень",
+            ),
         ],
     )
