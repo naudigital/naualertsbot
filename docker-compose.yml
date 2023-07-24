@@ -7,8 +7,8 @@ services:
       - redis-data:/data
 
   app:
-    image: airalertbot:latest
-    command: [ "airalertbot", "--config", "/config.yml" ]
+    image: naualertsbot:latest
+    command: [ "naualertsbot", "--config", "/config.yml" ]
     ports:
       - "8080:8080"
     depends_on:

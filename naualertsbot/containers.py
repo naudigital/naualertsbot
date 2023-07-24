@@ -2,8 +2,8 @@ from aiogram import Bot, Dispatcher
 from aiohttp import web
 from dependency_injector import containers, providers
 
-from airalertbot.db import init_redis
-from airalertbot.services import alerts, weeks, worker
+from naualertsbot.db import init_redis
+from naualertsbot.services import alerts, weeks, worker
 
 
 class Services(containers.DeclarativeContainer):

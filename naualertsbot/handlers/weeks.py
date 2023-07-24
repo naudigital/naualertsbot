@@ -9,13 +9,13 @@ from aiogram.exceptions import TelegramBadRequest
 from aiogram.filters import Command
 from dependency_injector.wiring import Provide, inject
 
-from airalertbot.stats import update_stats
+from naualertsbot.stats import update_stats
 
 if TYPE_CHECKING:
     from aiogram import Bot
     from dependency_injector.providers import Configuration
 
-    from airalertbot.services.weeks import WeeksService
+    from naualertsbot.services.weeks import WeeksService
 
 logger = getLogger(__name__)
 

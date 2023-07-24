@@ -7,18 +7,18 @@ from aiohttp import web
 from dependency_injector.wiring import Provide, inject
 from pydantic import ValidationError
 
-from airalertbot import bot, services
-from airalertbot.graceful_exit import GracefulExitManager
-from airalertbot.models import Alert
+from naualertsbot import bot, services
+from naualertsbot.graceful_exit import GracefulExitManager
+from naualertsbot.models import Alert
 
 if TYPE_CHECKING:
     from dependency_injector.providers import Configuration
     from redis.asyncio import Redis
 
-    from airalertbot.containers import Container
-    from airalertbot.services.alerts import AlertsService
-    from airalertbot.services.weeks import WeeksService
-    from airalertbot.services.worker import WorkerService
+    from naualertsbot.containers import Container
+    from naualertsbot.services.alerts import AlertsService
+    from naualertsbot.services.weeks import WeeksService
+    from naualertsbot.services.worker import WorkerService
 
 
 logger = getLogger(__name__)

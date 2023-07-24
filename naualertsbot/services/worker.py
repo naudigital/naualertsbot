@@ -6,15 +6,15 @@ from aiogram import types
 from aiogram.exceptions import TelegramMigrateToChat
 from dependency_injector.wiring import Provide, inject
 
-from airalertbot.models import Alert, Status
-from airalertbot.stats import migrate_chat
-from airalertbot.texts import get_text
+from naualertsbot.models import Alert, Status
+from naualertsbot.stats import migrate_chat
+from naualertsbot.texts import get_text
 
 if TYPE_CHECKING:
     from aiogram import Bot
     from redis.asyncio import Redis
 
-    from airalertbot.services.alerts import AlertsService
+    from naualertsbot.services.alerts import AlertsService
 
 
 logger = getLogger(__name__)

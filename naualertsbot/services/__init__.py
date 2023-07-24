@@ -1,5 +1,5 @@
 """Services."""
-from airalertbot.services import alerts
+from naualertsbot.services import alerts
 
 
 async def init() -> None:

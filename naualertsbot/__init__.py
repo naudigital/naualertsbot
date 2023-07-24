@@ -1,0 +1,1 @@
+"""Alerts bot for Telegram."""

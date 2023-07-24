@@ -7,8 +7,8 @@ import pytz
 from aiogram.exceptions import TelegramMigrateToChat
 from dependency_injector.wiring import Provide, inject
 
-from airalertbot.models import WeekNumber
-from airalertbot.stats import migrate_chat
+from naualertsbot.models import WeekNumber
+from naualertsbot.stats import migrate_chat
 
 if TYPE_CHECKING:
     from aiogram import Bot

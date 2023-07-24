@@ -6,7 +6,7 @@ from aiogram import types
 from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
 from dependency_injector.wiring import Provide, inject
 
-from airalertbot.handlers import router
+from naualertsbot.handlers import router
 
 if TYPE_CHECKING:
     from aiogram import Bot, Dispatcher

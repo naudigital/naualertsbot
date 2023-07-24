@@ -6,7 +6,7 @@ from aiogram import Router, types
 from aiogram.filters import Command
 from dependency_injector.wiring import Provide, inject
 
-from airalertbot.stats import update_stats
+from naualertsbot.stats import update_stats
 
 if TYPE_CHECKING:
     from aiogram import Bot

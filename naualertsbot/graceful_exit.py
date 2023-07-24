@@ -6,7 +6,7 @@ from logging import getLogger
 from typing import TYPE_CHECKING, Any, Awaitable, Callable, NoReturn, cast
 
 if TYPE_CHECKING:
-    from airalertbot.containers import Container
+    from naualertsbot.containers import Container
 
 logger = getLogger(__name__)
 

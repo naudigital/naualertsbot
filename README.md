@@ -1,1 +1,1 @@
-# NAU Air Alerts
+# NAU Alerts

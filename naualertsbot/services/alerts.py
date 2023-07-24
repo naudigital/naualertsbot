@@ -10,7 +10,7 @@ from aiohttp import ClientSession, web
 from dependency_injector.wiring import Provide, inject
 from pydantic import ValidationError
 
-from airalertbot import models
+from naualertsbot import models
 
 if TYPE_CHECKING:
     from dependency_injector.providers import Configuration

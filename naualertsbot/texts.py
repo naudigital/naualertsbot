@@ -4,7 +4,7 @@ import pytz
 import yaml
 
 if TYPE_CHECKING:
-    from airalertbot.models import Alert
+    from naualertsbot.models import Alert
 
 
 texts: dict[str, dict[str, str]]

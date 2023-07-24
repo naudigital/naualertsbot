@@ -4,12 +4,12 @@ tasks:
   isort:
     desc: Format the project with isort
     cmds:
-      - poetry run isort airalertbot
+      - poetry run isort naualertsbot
 
   black:
     desc: Format the project with black
     cmds:
-      - poetry run black airalertbot
+      - poetry run black naualertsbot
 
   default:
     desc: Format the project

@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, Any
 
 from dependency_injector.wiring import Provide, inject
 
-from airalertbot.models import ChatStats
+from naualertsbot.models import ChatStats
 
 if TYPE_CHECKING:
     from aiogram import Bot

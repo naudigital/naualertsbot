@@ -6,15 +6,15 @@ from aiogram import Router, types
 from aiogram.filters import Command
 from dependency_injector.wiring import Provide, inject
 
-from airalertbot.models import AlarmType, Alert, Status
-from airalertbot.stats import get_stats
-from airalertbot.texts import get_text
+from naualertsbot.models import AlarmType, Alert, Status
+from naualertsbot.stats import get_stats
+from naualertsbot.texts import get_text
 
 if TYPE_CHECKING:
     from aiogram import Bot
     from dependency_injector.providers import Configuration
 
-    from airalertbot.services.alerts import AlertsService
+    from naualertsbot.services.alerts import AlertsService
 
 logger = getLogger(__name__)
 

@@ -9,7 +9,7 @@ from aiogram.filters.callback_data import CallbackData
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from dependency_injector.wiring import Provide, inject
 
-from airalertbot.stats import update_stats
+from naualertsbot.stats import update_stats
 
 if TYPE_CHECKING:
     from aiogram import Bot
