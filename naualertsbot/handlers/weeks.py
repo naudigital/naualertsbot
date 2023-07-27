@@ -5,17 +5,17 @@ from logging import getLogger
 from typing import TYPE_CHECKING, cast
 
 from aiogram import Router, types
-from aiogram.exceptions import TelegramBadRequest
+from aiogram.exceptions import TelegramBadRequest, TelegramForbiddenError
 from aiogram.filters import Command
 from dependency_injector.wiring import Provide, inject
 
-from airalertbot.stats import update_stats
+from naualertsbot.stats import update_stats
 
 if TYPE_CHECKING:
     from aiogram import Bot
     from dependency_injector.providers import Configuration
 
-    from airalertbot.services.weeks import WeeksService
+    from naualertsbot.services.weeks import WeeksService
 
 logger = getLogger(__name__)
 
@@ -33,7 +33,7 @@ async def delete_delayed(messages: list[types.Message], delay: int) -> None:
     """
     await asyncio.sleep(delay)
     for message in messages:
-        with suppress(TelegramBadRequest):
+        with suppress(TelegramBadRequest, TelegramForbiddenError):
             await message.delete()
 
 

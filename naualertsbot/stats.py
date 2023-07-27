@@ -1,9 +1,10 @@
 import json
 from typing import TYPE_CHECKING, Any
 
+from aiogram.exceptions import TelegramForbiddenError
 from dependency_injector.wiring import Provide, inject
 
-from airalertbot.models import ChatStats
+from naualertsbot.models import ChatStats
 
 if TYPE_CHECKING:
     from aiogram import Bot
@@ -24,7 +25,12 @@ async def update_stats(
         bot: Bot instance.
         redis: Redis instance.
     """
-    me_participant = await bot.get_chat_member(chat.id, (await bot.me()).id)
+    try:
+        me_participant = await bot.get_chat_member(chat.id, (await bot.me()).id)
+    except TelegramForbiddenError:
+        # bot was kicked from chat
+        await redis.hdel("stats", str(chat.id))
+        return
 
     await redis.hset(
         "stats",

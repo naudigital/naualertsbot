@@ -4,22 +4,22 @@ tasks:
   flake8:
     desc: Lint the project with flake8
     cmds:
-      - poetry run flake8 --benchmark --statistics airalertbot
+      - poetry run flake8 --benchmark --statistics naualertsbot
 
   mypy:
     desc: Lint the project with mypy
     cmds:
-      - poetry run mypy --config-file mypy.ini airalertbot
+      - poetry run mypy --config-file mypy.ini naualertsbot
 
   isort:
     desc: Lint the project with isort
     cmds:
-      - poetry run isort --check-only --diff airalertbot
+      - poetry run isort --check-only --diff naualertsbot
 
   black:
     desc: Lint the project with black
     cmds:
-      - poetry run black --check --diff airalertbot
+      - poetry run black --check --diff naualertsbot
 
   default:
     desc: Lint the project

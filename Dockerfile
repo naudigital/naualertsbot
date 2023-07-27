@@ -32,10 +32,10 @@ ENV DEBIAN_FRONTEND=noninteractive \
 WORKDIR /app
 
 RUN mkdir -p /opt/app
-COPY --from=build /usr/src/app/dist/airalertbot-*.whl /opt/app
-RUN pip install /opt/app/airalertbot-*.whl && \
+COPY --from=build /usr/src/app/dist/naualertsbot-*.whl /opt/app
+RUN pip install /opt/app/naualertsbot-*.whl && \
     rm -rf /opt/app
 
 COPY assets /app/assets
 
-CMD [ "airalertbot" ]
+CMD [ "naualertsbot" ]

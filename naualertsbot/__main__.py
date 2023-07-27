@@ -12,17 +12,17 @@ import sentry_sdk
 from sentry_sdk.integrations.aiohttp import AioHttpIntegration
 from sentry_sdk.integrations.redis import RedisIntegration
 
-from airalertbot import main
-from airalertbot.containers import Container
+from naualertsbot import main
+from naualertsbot.containers import Container
 
 dotenv.load_dotenv()
 
-logger = getLogger("airalertbot")
+logger = getLogger("naualertsbot")
 
 
 async def bootstrap() -> NoReturn:
     """Bootstrap bot."""
-    parser = argparse.ArgumentParser(description="AirAlertBot")
+    parser = argparse.ArgumentParser(description="NAU Alerts Bot")
     parser.add_argument(
         "--config",
         type=str,
@@ -38,7 +38,7 @@ async def bootstrap() -> NoReturn:
     args = parser.parse_args(sys.argv[1:])
     coloredlogs.install(level=args.log_level)  # type: ignore
 
-    logger.info("Running airalertbot version %s", version(__package__))
+    logger.info("Running naualertsbot version %s", version(__package__))
     logger.info("Loading config from %s", args.config)
 
     if not os.path.isfile(args.config):
@@ -61,7 +61,7 @@ async def bootstrap() -> NoReturn:
     await container.init_resources()  # type: ignore
 
     logger.info("Wiring packages")
-    container.wire(packages=["airalertbot"])
+    container.wire(packages=["naualertsbot"])
 
     await main.main()
 

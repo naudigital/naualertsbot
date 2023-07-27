@@ -10,7 +10,7 @@ from aiohttp import ClientSession, web
 from dependency_injector.wiring import Provide, inject
 from pydantic import ValidationError
 
-from airalertbot import models
+from naualertsbot import models
 
 if TYPE_CHECKING:
     from dependency_injector.providers import Configuration
@@ -138,8 +138,6 @@ class AlertsService:  # noqa: WPS306
         if self._webhook_path:
             await self._remove_webhook(self._webhook_path)
         await self._session.close()
-
-        await self._queue.join()
 
     async def _handle_webhook(
         self: "AlertsService",

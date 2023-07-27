@@ -7,18 +7,18 @@ from aiohttp import web
 from dependency_injector.wiring import Provide, inject
 from pydantic import ValidationError
 
-from airalertbot import bot, services
-from airalertbot.graceful_exit import GracefulExitManager
-from airalertbot.models import Alert
+from naualertsbot import bot, services
+from naualertsbot.graceful_exit import GracefulExitManager
+from naualertsbot.models import Alert
 
 if TYPE_CHECKING:
     from dependency_injector.providers import Configuration
     from redis.asyncio import Redis
 
-    from airalertbot.containers import Container
-    from airalertbot.services.alerts import AlertsService
-    from airalertbot.services.weeks import WeeksService
-    from airalertbot.services.worker import WorkerService
+    from naualertsbot.containers import Container
+    from naualertsbot.services.alerts import AlertsService
+    from naualertsbot.services.weeks import WeeksService
+    from naualertsbot.services.worker import WorkerService
 
 
 logger = getLogger(__name__)
@@ -76,7 +76,7 @@ async def main(  # noqa: WPS210, WPS213
     app: "web.Application" = Provide["http.app"],
     config: "Configuration" = Provide["http.config"],
     container: "Container" = Provide["cself"],
-    alert_service: "AlertsService" = Provide["services.alerts"],
+    alerts_service: "AlertsService" = Provide["services.alerts"],
     worker_service: "WorkerService" = Provide["services.worker"],
     weeks_service: "WeeksService" = Provide["services.weeks"],
 ) -> NoReturn:
@@ -86,7 +86,7 @@ async def main(  # noqa: WPS210, WPS213
         app: Application instance.
         config: Configuration instance.
         container: Container instance.
-        alert_service: Alert service instance.
+        alerts_service: Alert service instance.
         worker_service: Worker service instance.
         weeks_service: Weeks service instance.
     """
@@ -129,12 +129,16 @@ async def main(  # noqa: WPS210, WPS213
 
     manager = GracefulExitManager(container, loop)
 
+    # setup exit callbacks
     manager.add_exit_callback(app.shutdown)
     manager.add_exit_callback(weeks_service.shutdown)
     manager.add_exit_callback(worker_service.shutdown)
-    manager.add_exit_callback(alert_service.shutdown)
+    manager.add_exit_callback(alerts_service.shutdown)
     manager.add_exit_callback(save_alerts_state)
 
+    # setup main bot tasks
+    # task 'worker_task' will not be cancelled on exit
+    # because it must finish all internal jobs
     manager.track_task(worker_task, cancel_on_exit=False)
     manager.track_task(server_task)
     manager.track_task(weeks_task)

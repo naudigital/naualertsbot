@@ -1,18 +1,22 @@
 bot:
-  token: TOKEN
+  token: TOKEN  # Telegram bot token
   admins:
-    - 1234567890
+    - 1234567890  # Telegram admin user ID
 
 db:
-  redis_url: redis://redis:6379/0
+  redis_url: redis://redis:6379/0  # Redis URL
 
 services:
   alerts:
-    base_url: https://api.ukrainealarm.com/
-    api_token: 1234567890abcdefg
-    region: 31
+    base_url: https://api.ukrainealarm.com/  # UkraineAlarm API URL
+    api_token: 1234567890abcdefg  # UkraineAlarm API token
+    region: 31  # Region ID
 
 http:
-  base_url: https://bots.example.com/airalert
-  host: 127.0.0.1
-  port: 8080
+  base_url: https://bots.example.com/naualertsbot  # Base URL for webhooks
+  host: 0.0.0.0  # Host to listen on
+  port: 8080  # Port to listen on
+
+
+# Uncomment to enable Sentry
+# sentry_dsn: https://sentry.io/...

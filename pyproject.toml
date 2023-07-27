@@ -1,13 +1,13 @@
 [tool.poetry]
-name = "airalertbot"
-version = "0.3.4"
+name = "naualertsbot"
+version = "1.0.0"
 description = ""
 authors = ["Stanislav <h3xcode@envs.net>"]
 license = "Apache-2.0"
 readme = "README.md"
 
 [tool.poetry.scripts]
-airalertbot = "airalertbot.__main__:poetry_main"
+naualertsbot = "naualertsbot.__main__:poetry_main"
 
 [tool.poetry.dependencies]
 python = "^3.11"

@@ -1,20 +1,39 @@
-version: "3"
-
+version: "3.8"
 services:
   redis:
-    image: redis:alpine
+    image: redis:latest
+    networks:
+      - naualertsbot
     volumes:
-      - redis-data:/data
+      - naualertsbot-data:/data
 
-  app:
-    image: airalertbot:latest
-    command: [ "airalertbot", "--config", "/config.yml" ]
-    ports:
-      - "8080:8080"
+  naualertsbot:
+    image: ${IMAGE}:${TAG}
+    command: [ "naualertsbot", "--config", "/config.yml", "--log-level", "INFO" ]
     depends_on:
       - redis
-    volumes:
-      - ./config.yml:/config.yml
+    networks:
+      - naualertsbot
+      - traefik-public
+    configs:
+      - source: naualertsbot
+        target: /config.yml
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.naualertsbot.rule=Host(`bots.example.com`) && PathPrefix(`/naualertsbot`)"
+        - "traefik.http.routers.naualertsbot.entrypoints=web"
+        - "traefik.http.services.naualertsbot.loadbalancer.server.port=8080"
+        - "traefik.http.routers.naualertsbot.service=naualertsbot"
 
 volumes:
-  redis-data:
+  naualertsbot-data:
+
+configs:
+  naualertsbot:
+    external: true
+
+networks:
+  traefik-public:
+    external: true
+  naualertsbot:

@@ -6,7 +6,7 @@ from aiogram import types
 from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
 from dependency_injector.wiring import Provide, inject
 
-from airalertbot.handlers import router
+from naualertsbot.handlers import router
 
 if TYPE_CHECKING:
     from aiogram import Bot, Dispatcher
@@ -54,7 +54,7 @@ async def init(
     SimpleRequestHandler(dispatcher=dp, bot=bot).register(app, path=webhook_path)
     setup_application(app, dp)
 
-    await bot.set_webhook(webhook_url)
+    await bot.set_webhook(webhook_url, allowed_updates=dp.resolve_used_update_types())
     logger.info("Registered webhook: %s", webhook_url)
 
     await bot.set_my_commands(

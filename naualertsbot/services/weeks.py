@@ -4,11 +4,12 @@ from logging import getLogger
 from typing import TYPE_CHECKING, Any
 
 import pytz
-from aiogram.exceptions import TelegramMigrateToChat
+from aiogram import types
+from aiogram.exceptions import TelegramForbiddenError, TelegramMigrateToChat
 from dependency_injector.wiring import Provide, inject
 
-from airalertbot.models import WeekNumber
-from airalertbot.stats import migrate_chat
+from naualertsbot.models import WeekNumber
+from naualertsbot.stats import migrate_chat, update_stats
 
 if TYPE_CHECKING:
     from aiogram import Bot
@@ -149,4 +150,9 @@ class WeeksService:  # noqa: WPS306
                 await redis.srem("subscribers:weeks", chat_id)
                 await redis.sadd("subscribers:weeks", err.migrate_to_chat_id)
                 await bot.send_message(err.migrate_to_chat_id, text)
+            except TelegramForbiddenError:
+                logger.info("Chat %s blocked bot", chat_id)
+                await redis.srem("subscribers:alerts", chat_id)
+                await redis.srem("subscribers:weeks", chat_id)
+                await update_stats(types.Chat(id=chat_id, type="supergroup"))
             await asyncio.sleep(0.5)
