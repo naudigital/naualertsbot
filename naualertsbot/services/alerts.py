@@ -139,8 +139,6 @@ class AlertsService:  # noqa: WPS306
             await self._remove_webhook(self._webhook_path)
         await self._session.close()
 
-        await self._queue.join()
-
     async def _handle_webhook(
         self: "AlertsService",
         request: web.Request,
