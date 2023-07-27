@@ -54,7 +54,7 @@ async def init(
     SimpleRequestHandler(dispatcher=dp, bot=bot).register(app, path=webhook_path)
     setup_application(app, dp)
 
-    await bot.set_webhook(webhook_url)
+    await bot.set_webhook(webhook_url, allowed_updates=dp.resolve_used_update_types())
     logger.info("Registered webhook: %s", webhook_url)
 
     await bot.set_my_commands(

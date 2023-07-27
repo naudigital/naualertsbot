@@ -4,6 +4,14 @@ from typing import TYPE_CHECKING, Any
 from aiogram import F as _MF
 from aiogram import Router, types
 from aiogram.filters import Command
+from aiogram.filters.chat_member_updated import (
+    IS_ADMIN,
+    IS_MEMBER,
+    IS_NOT_MEMBER,
+    MEMBER,
+    RESTRICTED,
+    ChatMemberUpdatedFilter,
+)
 from dependency_injector.wiring import Provide, inject
 
 from naualertsbot.stats import update_stats
@@ -64,7 +72,7 @@ async def start(
                     [
                         types.InlineKeyboardButton(
                             text="Додати в групу",
-                            url=f"https://t.me/{me.username}?startgroup=true",
+                            url=f"https://t.me/{me.username}?startgroup&admin=delete_messages",
                         ),
                     ],
                 ],
@@ -184,3 +192,108 @@ async def group_leave(
     await redis.srem("subscribers:alerts", message.chat.id)
     await redis.srem("subscribers:weeks", message.chat.id)
     logger.info("Bot was removed from group %s", message.chat.id)
+
+
+@router.my_chat_member(
+    ChatMemberUpdatedFilter(member_status_changed=IS_NOT_MEMBER >> IS_ADMIN),
+)
+@inject
+async def added_as_admin(
+    event: types.ChatMemberUpdated,
+    bot: "Bot" = Provide["bot_context.bot"],
+    redis: "Redis[Any]" = Provide["db.redis"],
+) -> None:
+    """Add group to subscribers when bot is added as admin.
+
+    Args:
+        event: ChatMemberUpdated instance.
+        bot: Bot instance.
+        redis: Redis instance.
+    """
+    if event.chat.type not in {"group", "supergroup"}:
+        return
+
+    await update_stats(event.chat)
+
+    me_member = event.new_chat_member
+    if not me_member.can_delete_messages:
+        await bot.send_message(
+            event.chat.id,
+            (
+                "❌ <b>Упс!</b> Схоже я не маю права видаляти повідомлення. "
+                "Без цього не будуть працювати команди /week та /calendar."
+            ),
+        )
+        return
+
+    if await _is_subscribed(event.chat):
+        logger.critical("Propably missed leave event for %s", event.chat.id)
+    else:
+        await redis.sadd("subscribers:alerts", event.chat.id)
+        await redis.sadd("subscribers:weeks", event.chat.id)
+        logger.info("Bot was added to group %s", event.chat.id)
+
+    await bot.send_message(
+        event.chat.id,
+        (
+            "🎉 <b>Успішно!</b>\n"
+            "Щоб налаштувати сповіщення використовуйте /settings.\n"
+            "Відписатись від розсилки - /stop.\n\n"
+        ),
+    )
+
+
+@router.my_chat_member(
+    ChatMemberUpdatedFilter(
+        member_status_changed=IS_NOT_MEMBER >> (MEMBER | +RESTRICTED),
+    ),
+)
+@inject
+async def added_as_member(
+    event: types.ChatMemberUpdated,
+    bot: "Bot" = Provide["bot_context.bot"],
+) -> None:
+    """Add group to subscribers when bot is added as member.
+
+    Args:
+        event: ChatMemberUpdated instance.
+        bot: Bot instance.
+    """
+    if event.chat.type not in {"group", "supergroup"}:
+        return
+
+    await bot.send_message(
+        event.chat.id,
+        (
+            "❌ <b>Помилочка!</b>\n"
+            "Боту необхідні права адміністратора з правом видалення повідомлень."
+            "Спробуйте додати мене до чату через моє меню. Для цього напишіть мені "
+            "в особисті."
+        ),
+    )
+    await bot.leave_chat(event.chat.id)
+
+
+@router.my_chat_member(
+    ChatMemberUpdatedFilter(member_status_changed=IS_MEMBER >> IS_NOT_MEMBER),
+)
+@inject
+async def removed_from_group(
+    event: types.ChatMemberUpdated,
+    redis: "Redis[Any]" = Provide["db.redis"],
+) -> None:
+    """Unsubscribe group when bot is removed from it.
+
+    Args:
+        event: ChatMemberUpdated instance.
+        redis: Redis instance.
+    """
+    if event.chat.type not in {"group", "supergroup"}:
+        return
+
+    await update_stats(event.chat)
+
+    if await _is_subscribed(event.chat):
+        await redis.srem("subscribers:alerts", event.chat.id)
+        await redis.srem("subscribers:weeks", event.chat.id)
+        logger.info("Bot was removed from group %s", event.chat.id)
