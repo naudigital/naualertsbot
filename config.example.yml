@@ -13,8 +13,8 @@ services:
     region: 31  # Region ID
 
 http:
-  base_url: https://bots.example.com/airalert  # Base URL for webhooks
-  host: 127.0.0.1  # Host to listen on
+  base_url: https://bots.example.com/naualertsbot  # Base URL for webhooks
+  host: 0.0.0.0  # Host to listen on
   port: 8080  # Port to listen on
 
 
