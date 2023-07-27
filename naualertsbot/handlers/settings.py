@@ -4,6 +4,7 @@ from types import MappingProxyType
 from typing import TYPE_CHECKING, Any
 
 from aiogram import Router, types
+from aiogram.exceptions import TelegramForbiddenError
 from aiogram.filters import Command
 from aiogram.filters.callback_data import CallbackData
 from aiogram.utils.keyboard import InlineKeyboardBuilder
@@ -138,7 +139,17 @@ async def settings_action(
     if not query.from_user:
         return
 
-    chat_member = await bot.get_chat_member(query.message.chat.id, query.from_user.id)
+    await update_stats(query.message.chat)
+
+    try:
+        chat_member = await bot.get_chat_member(
+            query.message.chat.id,
+            query.from_user.id,
+        )
+    except TelegramForbiddenError:
+        logger.debug("Ignoring callback action from unregistered chat")
+        return
+
     if chat_member.status not in {"administrator", "creator"}:
         return
 
