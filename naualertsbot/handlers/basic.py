@@ -1,7 +1,6 @@
 from logging import getLogger
 from typing import TYPE_CHECKING, Any
 
-from aiogram import F as _MF
 from aiogram import Router, types
 from aiogram.filters import Command
 from aiogram.filters.chat_member_updated import (
@@ -61,7 +60,7 @@ async def start(
     me = await bot.me()
     if message.chat.type == "private":
         await message.answer(
-            "👋 <b>Привіт!</b> Я бот, який буде надсилати сповіщення для НАУ в чатах. "
+            "👋 <b>Привіт!</b>\nЯ бот, який буде надсилати сповіщення для НАУ в чатах. "
             "Сюди входять сповіщення про тривогу з інформацією про укриття та "
             "повідомлення про навчальні тижні.\n\n"
             "⚙️ Команди бота можна дізнатись через меню.\n\n"
@@ -87,40 +86,6 @@ async def start(
 
     if not message.from_user:
         return
-
-    # check if user is admin
-    chat_member = await bot.get_chat_member(message.chat.id, message.from_user.id)
-    if chat_member.status not in {"administrator", "creator"}:
-        return
-
-    if await _is_subscribed(message.chat):
-        await message.answer(
-            "❌ <b>Помилка!</b>\n"
-            "Ви вже підписані на розсилку бота. Щоб відписатись, використовуйте "
-            "команду /stop.",
-        )
-        return
-
-    await redis.sadd("subscribers:alerts", message.chat.id)
-    await redis.sadd("subscribers:weeks", message.chat.id)
-
-    text = (
-        "🎉 <b>Успішно!</b>\n"
-        "Щоб налаштувати сповіщення використовуйте /settings.\n"
-        "Відписатись від розсилки - /stop.\n\n"
-    )
-    participant = await bot.get_chat_member(
-        message.chat.id,
-        (await bot.me()).id,
-    )
-    if not participant.can_delete_messages:
-        text += (
-            "💠 <b>Не забудьте призначити бота адміністратором з правом "  # noqa: WPS336
-            "видалення повідомлень!</b> Без цього не будуть працювати "
-            "команди /week та /calendar."
-        )
-
-    await message.answer(text)
 
 
 @router.message(Command("stop"))
@@ -153,45 +118,13 @@ async def stop(
     if chat_member.status not in {"administrator", "creator"}:
         return
 
-    if await _is_subscribed(message.chat):
-        await redis.srem("subscribers:alerts", message.chat.id)
-        await redis.srem("subscribers:weeks", message.chat.id)
-        await message.answer(
-            "✅ <b>Ви відписались від розсилки!</b> Щоб підписатись, "
-            "використовуйте команду /start.",
-        )
-        return
-
-    await message.answer(
-        "❌ <b>Помилка!</b>\nВи не були підписані на розсилку бота. Щоб "
-        "підписатись, використовуйте команду /start.",
-    )
-
-
-# unsubscribe group when bot is removed from it
-@router.message(_MF.left_chat_member)
-@inject
-async def group_leave(
-    message: types.Message,
-    bot: "Bot" = Provide["bot_context.bot"],
-    redis: "Redis[Any]" = Provide["db.redis"],
-) -> None:
-    """Unsubscribe group when bot is removed from it.
-
-    Args:
-        message: Message instance.
-        bot: Bot instance.
-        redis: Redis instance.
-    """
-    if not message.left_chat_member:
-        return
-
-    if message.left_chat_member.id != (await bot.me()).id:
-        return
-
     await redis.srem("subscribers:alerts", message.chat.id)
     await redis.srem("subscribers:weeks", message.chat.id)
-    logger.info("Bot was removed from group %s", message.chat.id)
+
+    await message.answer(
+        "✅ <b>Ви відписались від розсилки!</b>\nВсього найкращого🫡",
+    )
+    await message.chat.leave()
 
 
 @router.my_chat_member(
@@ -220,8 +153,10 @@ async def added_as_admin(
         await bot.send_message(
             event.chat.id,
             (
-                "❌ <b>Упс!</b> Схоже я не маю права видаляти повідомлення. "
-                "Без цього не будуть працювати команди /week та /calendar."
+                "❌ <b>Упс!</b>\n"
+                "Схоже я не маю права видаляти повідомлення. "
+                "Не змінюйте дозволи в меню додавання боту. Спробуйте ще раз "
+                "через особисті повідомлення зі мною."
             ),
         )
         return
@@ -271,7 +206,7 @@ async def added_as_member(
             "в особисті."
         ),
     )
-    await bot.leave_chat(event.chat.id)
+    await event.chat.leave()
 
 
 @router.my_chat_member(
