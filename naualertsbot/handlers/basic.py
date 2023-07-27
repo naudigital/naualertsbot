@@ -159,6 +159,7 @@ async def added_as_admin(
                 "через особисті повідомлення зі мною."
             ),
         )
+        await event.chat.leave()
         return
 
     if await _is_subscribed(event.chat):
