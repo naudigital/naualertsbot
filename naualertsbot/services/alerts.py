@@ -77,7 +77,6 @@ class AlertsService:  # noqa: WPS306
             self._webhook_path = rpath
             full_url = urljoin(base_url, self._webhook_path)
 
-        logger.debug("Listening at webhook path: %s", self._webhook_path)
         app.router.add_post(self._webhook_path, self._handle_webhook)
 
         await self._setup_webhook(full_url)
@@ -198,7 +197,6 @@ class AlertsService:  # noqa: WPS306
             json={"webHookUrl": url},
             ignore_response=True,
         )
-        logger.info("Registered webhook: %s", url)
 
     async def _remove_webhook(self: "AlertsService", url: str) -> None:
         await self._request(
