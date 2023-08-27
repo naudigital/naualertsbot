@@ -1,6 +1,5 @@
 import asyncio
 from contextlib import suppress
-from datetime import datetime
 from logging import getLogger
 from typing import TYPE_CHECKING, cast
 
@@ -9,13 +8,12 @@ from aiogram.exceptions import TelegramBadRequest, TelegramForbiddenError
 from aiogram.filters import Command
 from dependency_injector.wiring import Provide, inject
 
+from naualertsbot.services.weeks import WeeksService, get_current_date
 from naualertsbot.stats import update_stats
 
 if TYPE_CHECKING:
     from aiogram import Bot
     from dependency_injector.providers import Configuration
-
-    from naualertsbot.services.weeks import WeeksService
 
 logger = getLogger(__name__)
 
@@ -68,7 +66,7 @@ async def getweek(
             return
 
     week_number = await weeks_service.get_week_number()
-    weekday = datetime.now().weekday()
+    weekday = get_current_date().weekday()
 
     if weekday == 4:
         response = await message.answer(
