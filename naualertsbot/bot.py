@@ -73,5 +73,9 @@ async def init(
                 command="/settings",
                 description="Налаштування сповіщень",
             ),
+            types.BotCommand(
+                command="/shelter",
+                description="Переглянути інформацію про сховища",
+            ),
         ],
     )
