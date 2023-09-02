@@ -1,14 +1,16 @@
 import asyncio
+from datetime import datetime
 from logging import getLogger
 from typing import TYPE_CHECKING, Any
 
+import pytz
 from aiogram import types
 from aiogram.exceptions import TelegramForbiddenError, TelegramMigrateToChat
 from dependency_injector.wiring import Provide, inject
 
 from naualertsbot.models import Alert, Status
 from naualertsbot.stats import migrate_chat, update_stats
-from naualertsbot.texts import get_text
+from naualertsbot.texts import EDUCATIONAL_RANGE, get_text
 
 if TYPE_CHECKING:
     from aiogram import Bot
@@ -19,7 +21,8 @@ if TYPE_CHECKING:
 
 logger = getLogger(__name__)
 
-IMGFILE = types.FSInputFile("assets/map.jpg")
+IMGFILE_EDUCATIONAL = types.FSInputFile("assets/map_educational.jpg")
+IMGFILE_CAMPUS = types.FSInputFile("assets/map_campus.jpg")
 
 
 class WorkerService:  # noqa: WPS306
@@ -83,7 +86,6 @@ class WorkerService:  # noqa: WPS306
         alert: "Alert",
         previous_alert: "Alert | None",
         redis: "Redis[Any]" = Provide["db.redis"],
-        bot: "Bot" = Provide["bot_context.bot"],
     ) -> None:
         """Send alert to all subscribed groups.
 
@@ -91,7 +93,6 @@ class WorkerService:  # noqa: WPS306
             alert: Alert instance.
             previous_alert: Previous alert instance.
             redis: Redis client instance.
-            bot: Bot instance.
         """
         text = get_text(alert, previous_alert)
 
@@ -132,9 +133,14 @@ class WorkerService:  # noqa: WPS306
             bot: Bot instance.
         """
         if alert_status == Status.ACTIVATE:
+            now = datetime.now(pytz.timezone("Europe/Kiev"))
+            if now.hour in EDUCATIONAL_RANGE:
+                imgfile = IMGFILE_EDUCATIONAL
+            else:
+                imgfile = IMGFILE_CAMPUS
             await bot.send_photo(
                 chat_id,
-                IMGFILE,
+                imgfile,
                 caption=text,
             )
         else:

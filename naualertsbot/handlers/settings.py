@@ -131,16 +131,16 @@ async def settings_action(
         redis: Redis instance.
     """
     if not query.message:
-        await query.answer("❌ <b>Помилка!</b>\nЦя команда доступна тільки в групах.")
+        await query.answer("❌ Помилка!\nЦя команда доступна тільки в групах.")
         return
 
     if query.message.chat.type not in {"group", "supergroup"}:
-        await query.answer("❌ <b>Помилка!</b>\nЦя команда доступна тільки в групах.")
+        await query.answer("❌ Помилка!\nЦя команда доступна тільки в групах.")
         return
 
     if not query.from_user:
         await query.answer(
-            "❌ <b>Помилка!</b>\nЦя команда доступна тільки користувачам.",
+            "❌ Помилка!\nЦя команда доступна тільки користувачам.",
         )
         return
 
@@ -152,13 +152,13 @@ async def settings_action(
             query.from_user.id,
         )
     except TelegramForbiddenError:
-        await query.answer("❌ <b>Помилка!</b>\nЯ не можу знайти вас в цій групі.")
+        await query.answer("❌ Помилка!\nЯ не можу знайти вас в цій групі.")
         logger.debug("Ignoring callback action from unregistered chat")
         return
 
     if chat_member.status not in {"administrator", "creator"}:
         await query.answer(
-            "❌ <b>Помилка!</b>\nЦя команда доступна тільки адміністраторам.",
+            "❌ Помилка!\nЦя команда доступна тільки адміністраторам.",
         )
         return
 
