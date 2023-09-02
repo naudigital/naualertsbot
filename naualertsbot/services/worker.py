@@ -1,6 +1,8 @@
 import asyncio
 from logging import getLogger
 from typing import TYPE_CHECKING, Any
+from datetime import datetime
+import pytz
 
 from aiogram import types
 from aiogram.exceptions import TelegramForbiddenError, TelegramMigrateToChat
@@ -19,7 +21,8 @@ if TYPE_CHECKING:
 
 logger = getLogger(__name__)
 
-IMGFILE = types.FSInputFile("assets/map.jpg")
+IMGFILE_EDUCATIONAL = types.FSInputFile("assets/map_educational.jpg")
+IMGFILE_CAMPUS = types.FSInputFile("assets/map_campus.jpg")
 
 
 class WorkerService:  # noqa: WPS306
@@ -83,7 +86,6 @@ class WorkerService:  # noqa: WPS306
         alert: "Alert",
         previous_alert: "Alert | None",
         redis: "Redis[Any]" = Provide["db.redis"],
-        bot: "Bot" = Provide["bot_context.bot"],
     ) -> None:
         """Send alert to all subscribed groups.
 
@@ -91,7 +93,6 @@ class WorkerService:  # noqa: WPS306
             alert: Alert instance.
             previous_alert: Previous alert instance.
             redis: Redis client instance.
-            bot: Bot instance.
         """
         text = get_text(alert, previous_alert)
 
@@ -132,9 +133,14 @@ class WorkerService:  # noqa: WPS306
             bot: Bot instance.
         """
         if alert_status == Status.ACTIVATE:
+            now = datetime.now(pytz.timezone("Europe/Kiev"))
+            if 7 <= now.hour <= 16:
+                file = IMGFILE_EDUCATIONAL
+            else:
+                file = IMGFILE_CAMPUS
             await bot.send_photo(
                 chat_id,
-                IMGFILE,
+                file,
                 caption=text,
             )
         else:

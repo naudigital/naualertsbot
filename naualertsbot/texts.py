@@ -2,6 +2,7 @@ from typing import TYPE_CHECKING
 
 import pytz
 import yaml
+from datetime import datetime
 
 if TYPE_CHECKING:
     from naualertsbot.models import Alert
@@ -35,6 +36,12 @@ def get_text(model: "Alert", previous_model: "Alert | None") -> str:
         duration_timedelta = model.created_at - previous_model.created_at
         duration = str(duration_timedelta).split(".")[0]
 
+    now = datetime.now(pytz.timezone("Europe/Kiev"))
+    if 7 <= now.hour <= 16:
+        text_type = "educational"
+    else:
+        text_type = "campus"
+
     text = texts.get(model.alarm_type.value, {}).get(
         alarm_status,
         None,
@@ -42,7 +49,31 @@ def get_text(model: "Alert", previous_model: "Alert | None") -> str:
     if text is None:
         text = texts["unknown"][alarm_status]
 
+    additional_text = texts.get("additional_info", {}).get(text_type, None)
+    if additional_text is not None:
+        text += "\n\n" + additional_text
+
     return text.format(
         time=local_datetime.strftime("%H:%M:%S"),
         duration=duration,
     )
+
+
+def get_raw_text(key: str) -> str:
+    """Get raw text.
+
+    Args:
+        key: Text key.
+
+    Returns:
+        Raw text.
+    """
+    parts = key.split(".")
+    text = texts
+    for part in parts:
+        if not isinstance(text, dict):  # type: ignore
+            raise KeyError(f"Text with key {key} not found.")
+        text = text[part]
+    if not isinstance(text, str):
+        raise KeyError(f"Text with key {key} not found.")
+    return text

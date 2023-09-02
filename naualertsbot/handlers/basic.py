@@ -14,6 +14,7 @@ from aiogram.filters.chat_member_updated import (
 from dependency_injector.wiring import Provide, inject
 
 from naualertsbot.stats import update_stats
+from naualertsbot.texts import get_raw_text
 
 if TYPE_CHECKING:
     from aiogram import Bot
@@ -60,12 +61,7 @@ async def start(
     me = await bot.me()
     if message.chat.type == "private":
         await message.answer(
-            "👋 <b>Привіт!</b>\nЯ бот, який буде надсилати сповіщення для НАУ в чатах. "
-            "Сюди входять сповіщення про тривогу з інформацією про укриття та "
-            "повідомлення про навчальні тижні.\n\n"
-            "⚙️ Команди бота можна дізнатись через меню.\n\n"
-            "🔽 Для того, щоб я почав надсилати повідомлення, додайте мене в групу через "
-            "кнопку нижче.",
+            get_raw_text("basic.start"),
             reply_markup=types.InlineKeyboardMarkup(
                 inline_keyboard=[
                     [

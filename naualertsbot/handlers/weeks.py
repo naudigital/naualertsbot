@@ -10,6 +10,7 @@ from dependency_injector.wiring import Provide, inject
 
 from naualertsbot.services.weeks import WeeksService, get_current_date
 from naualertsbot.stats import update_stats
+from naualertsbot.texts import get_raw_text
 
 if TYPE_CHECKING:
     from aiogram import Bot
@@ -79,12 +80,27 @@ async def getweek(
             "• 3 пара - 11.40 - 13.15\n"
             "• 4 пара - 13.30 - 15.05\n"
             "• 5 пара - 15.20 - 16.55\n"
-            "• 6 пара - 17.10 - 18.45\n",
+            "• 6 пара - 17.10 - 18.45\n"
+            "• • • • • • • • • • • • • • • • • • •\n"
+            "<i>Надіслано ботом <b>@naualerts_bot</b>\n"
+            "(повідомлення видалиться автоматично через 30 сек)\n</i>",
         )
     elif weekday in {5, 6}:
         response = await message.answer(
             f"📒 <b>Закінчується {week_number.value}-й тиждень.</b>\n"
-            f"З понеділка - {week_number.invert().value}-й.",
+            f"З понеділка - {week_number.invert().value}-й."
+            "\n"
+            "• • • • • • • • • • • • • • • • • • •\n"
+            "⏰ Початок та кінець пар:\n"
+            "• 1 пара - 8.00 - 9.35\n"
+            "• 2 пара - 9.50 - 11.25\n"
+            "• 3 пара - 11.40 - 13.15\n"
+            "• 4 пара - 13.30 - 15.05\n"
+            "• 5 пара - 15.20 - 16.55\n"
+            "• 6 пара - 17.10 - 18.45\n"
+            "• • • • • • • • • • • • • • • • • • •\n"
+            "<i>Надіслано ботом <b>@naualerts_bot</b>\n"
+            "(повідомлення видалиться автоматично через 30 сек)\n</i>",
         )
     else:
         response = await message.answer(
@@ -97,7 +113,10 @@ async def getweek(
             "• 3 пара - 11.40 - 13.15\n"
             "• 4 пара - 13.30 - 15.05\n"
             "• 5 пара - 15.20 - 16.55\n"
-            "• 6 пара - 17.10 - 18.45\n",
+            "• 6 пара - 17.10 - 18.45\n"
+            "• • • • • • • • • • • • • • • • • • •\n"
+            "<i>Надіслано ботом <b>@naualerts_bot</b>\n"
+            "(повідомлення видалиться автоматично через 30 сек)\n</i>",
         )
 
     asyncio.ensure_future(delete_delayed([message, response], 60))
@@ -133,7 +152,7 @@ async def getcalendar(
 
     response = await message.answer_photo(
         CALENDAR_FILE,
-        caption="📅 <b>Календар II семестру 2022-2023 навчального року</b>",
+        caption=get_raw_text("calendar.caption"),
     )
 
     asyncio.ensure_future(delete_delayed([message, response], 60))
