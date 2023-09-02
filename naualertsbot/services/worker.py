@@ -1,16 +1,16 @@
 import asyncio
+from datetime import datetime
 from logging import getLogger
 from typing import TYPE_CHECKING, Any
-from datetime import datetime
-import pytz
 
+import pytz
 from aiogram import types
 from aiogram.exceptions import TelegramForbiddenError, TelegramMigrateToChat
 from dependency_injector.wiring import Provide, inject
 
 from naualertsbot.models import Alert, Status
 from naualertsbot.stats import migrate_chat, update_stats
-from naualertsbot.texts import get_text
+from naualertsbot.texts import EDUCATIONAL_RANGE, get_text
 
 if TYPE_CHECKING:
     from aiogram import Bot
@@ -134,13 +134,13 @@ class WorkerService:  # noqa: WPS306
         """
         if alert_status == Status.ACTIVATE:
             now = datetime.now(pytz.timezone("Europe/Kiev"))
-            if 7 <= now.hour <= 16:
-                file = IMGFILE_EDUCATIONAL
+            if now.hour in EDUCATIONAL_RANGE:
+                imgfile = IMGFILE_EDUCATIONAL
             else:
-                file = IMGFILE_CAMPUS
+                imgfile = IMGFILE_CAMPUS
             await bot.send_photo(
                 chat_id,
-                file,
+                imgfile,
                 caption=text,
             )
         else:

@@ -1,14 +1,15 @@
+from datetime import datetime
 from typing import TYPE_CHECKING
 
 import pytz
 import yaml
-from datetime import datetime
 
 if TYPE_CHECKING:
     from naualertsbot.models import Alert
 
 
 texts: dict[str, dict[str, str]]
+EDUCATIONAL_RANGE = range(7, 17)  # noqa: WPS432; intented as range from 7:00 to 17:00
 
 with open("assets/texts.yaml") as texts_file:
     texts = yaml.safe_load(texts_file)
@@ -37,7 +38,7 @@ def get_text(model: "Alert", previous_model: "Alert | None") -> str:
         duration = str(duration_timedelta).split(".")[0]
 
     now = datetime.now(pytz.timezone("Europe/Kiev"))
-    if 7 <= now.hour <= 16:
+    if now.hour in EDUCATIONAL_RANGE:
         text_type = "educational"
     else:
         text_type = "campus"
@@ -51,7 +52,7 @@ def get_text(model: "Alert", previous_model: "Alert | None") -> str:
 
     additional_text = texts.get("additional_info", {}).get(text_type, None)
     if additional_text is not None:
-        text += "\n\n" + additional_text
+        text += "\n\n" + additional_text  # noqa: WPS336; intented
 
     return text.format(
         time=local_datetime.strftime("%H:%M:%S"),
@@ -67,13 +68,16 @@ def get_raw_text(key: str) -> str:
 
     Returns:
         Raw text.
+
+    Raises:
+        KeyError: If text with key not found.
     """
     parts = key.split(".")
     text = texts
     for part in parts:
         if not isinstance(text, dict):  # type: ignore
             raise KeyError(f"Text with key {key} not found.")
-        text = text[part]
+        text = text[part]  # type: ignore
     if not isinstance(text, str):
         raise KeyError(f"Text with key {key} not found.")
     return text
