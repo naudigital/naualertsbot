@@ -13,6 +13,7 @@ from aiogram.filters.chat_member_updated import (
 )
 from dependency_injector.wiring import Provide, inject
 
+from naualertsbot.adminutils import check_bot_admin
 from naualertsbot.stats import update_stats
 from naualertsbot.texts import get_raw_text
 
@@ -145,7 +146,7 @@ async def added_as_admin(
     await update_stats(event.chat)
 
     me_member = event.new_chat_member
-    if not me_member.can_delete_messages:
+    if not check_bot_admin(me_member):
         await bot.send_message(
             event.chat.id,
             (

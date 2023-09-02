@@ -8,6 +8,7 @@ from aiogram.exceptions import TelegramBadRequest, TelegramForbiddenError
 from aiogram.filters import Command
 from dependency_injector.wiring import Provide, inject
 
+from naualertsbot.adminutils import check_bot_admin
 from naualertsbot.services.weeks import WeeksService, get_current_date
 from naualertsbot.stats import update_stats
 from naualertsbot.texts import get_raw_text
@@ -21,6 +22,8 @@ logger = getLogger(__name__)
 router = Router()
 
 CALENDAR_FILE = types.FSInputFile("assets/calendar.jpg")
+SHELTER_EDU_FILE = types.FSInputFile("assets/map_educational.jpg")
+SHELTER_CAMPUS_FILE = types.FSInputFile("assets/map_campus.jpg")
 
 
 async def delete_delayed(messages: list[types.Message], delay: int) -> None:
@@ -60,7 +63,7 @@ async def getweek(
             message.chat.id,
             (await bot.me()).id,
         )
-        if not participant.can_delete_messages:
+        if not check_bot_admin(participant):
             await message.answer(
                 "❌ <b>Помилка!</b>\nБот не має права для видалення повідомлень.",
             )
@@ -144,7 +147,7 @@ async def getcalendar(
             message.chat.id,
             (await bot.me()).id,
         )
-        if not participant.can_delete_messages:
+        if not check_bot_admin(participant):
             await message.answer(
                 "❌ <b>Помилка!</b>\nБот не має права для видалення повідомлень.",
             )
@@ -156,6 +159,48 @@ async def getcalendar(
     )
 
     asyncio.ensure_future(delete_delayed([message, response], 60))
+
+
+@router.message(Command("shelter"))
+@inject
+async def shelter(
+    message: types.Message,
+    bot: "Bot" = Provide["bot_context.bot"],
+) -> None:
+    """Get shelter.
+
+    Args:
+        message: Message instance.
+        bot: Bot instance.
+    """
+    if message.chat.type != "private":
+        # update stats if chat is group or supergroup
+        if message.chat.type in {"group", "supergroup"}:
+            await update_stats(message.chat)
+
+        # check if bot has delete message permission
+        participant = await bot.get_chat_member(
+            message.chat.id,
+            (await bot.me()).id,
+        )
+
+        if not check_bot_admin(participant):
+            await message.answer(
+                "❌ <b>Помилка!</b>\nБот не має права для видалення повідомлень.",
+            )
+            return
+
+    responses = await message.answer_media_group(
+        [
+            types.InputMediaPhoto(
+                media=SHELTER_EDU_FILE,
+                caption=get_raw_text("shelter.caption"),
+            ),
+            types.InputMediaPhoto(media=SHELTER_CAMPUS_FILE),
+        ],
+    )
+
+    asyncio.ensure_future(delete_delayed([message, *responses], 60))
 
 
 @router.message(Command("invert_weeks"))
