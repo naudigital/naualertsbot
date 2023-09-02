@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Any
 from aiogram.exceptions import TelegramForbiddenError
 from dependency_injector.wiring import Provide, inject
 
+from naualertsbot.adminutils import check_bot_admin
 from naualertsbot.models import ChatStats
 
 if TYPE_CHECKING:
@@ -40,7 +41,7 @@ async def update_stats(
                 "name": chat.title,
                 "username": chat.username,
                 "members": (await chat.get_member_count()),
-                "admin_rights": bool(me_participant.can_delete_messages),
+                "admin_rights": check_bot_admin(me_participant),
             },
         ),
     )

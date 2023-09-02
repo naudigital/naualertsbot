@@ -8,6 +8,7 @@ from aiogram.exceptions import TelegramBadRequest, TelegramForbiddenError
 from aiogram.filters import Command
 from dependency_injector.wiring import Provide, inject
 
+from naualertsbot.adminutils import check_bot_admin
 from naualertsbot.services.weeks import WeeksService, get_current_date
 from naualertsbot.stats import update_stats
 from naualertsbot.texts import get_raw_text
@@ -62,7 +63,7 @@ async def getweek(
             message.chat.id,
             (await bot.me()).id,
         )
-        if not participant.can_delete_messages:
+        if not check_bot_admin(participant):
             await message.answer(
                 "❌ <b>Помилка!</b>\nБот не має права для видалення повідомлень.",
             )
@@ -146,7 +147,7 @@ async def getcalendar(
             message.chat.id,
             (await bot.me()).id,
         )
-        if not participant.can_delete_messages:
+        if not check_bot_admin(participant):
             await message.answer(
                 "❌ <b>Помилка!</b>\nБот не має права для видалення повідомлень.",
             )
@@ -182,7 +183,8 @@ async def shelter(
             message.chat.id,
             (await bot.me()).id,
         )
-        if not participant.can_delete_messages:
+
+        if not check_bot_admin(participant):
             await message.answer(
                 "❌ <b>Помилка!</b>\nБот не має права для видалення повідомлень.",
             )
@@ -191,11 +193,10 @@ async def shelter(
     responses = await message.answer_media_group(
         [
             types.InputMediaPhoto(
-                type="photo",
                 media=SHELTER_EDU_FILE,
                 caption=get_raw_text("shelter.caption"),
             ),
-            types.InputMediaPhoto(type="photo", media=SHELTER_CAMPUS_FILE),
+            types.InputMediaPhoto(media=SHELTER_CAMPUS_FILE),
         ],
     )
 
