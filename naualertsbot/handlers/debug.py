@@ -1,7 +1,7 @@
 import shlex
 from datetime import datetime
 from logging import getLogger
-from typing import TYPE_CHECKING, cast, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from aiogram import Router, types
 from aiogram.filters import Command
@@ -119,6 +119,7 @@ async def stats(
     Args:
         message: Message instance.
         config: Bot configuration instance.
+        redis: Redis instance.
     """
     if not message.from_user:
         return
