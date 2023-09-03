@@ -149,7 +149,7 @@ async def stats(
 
     await message.answer(
         f"📊 <b>Статистика</b>\n\n"
-        f"👤 <b>Приватні чати:</b> <code>{len(pm_stats)}</code>"
+        f"👤 <b>Приватні чати:</b> <code>{len(pm_stats)}</code>\n"
         f"👥 <b>Групи:</b> <code>{len(chat_stats)}</code>\n"
         "\n"
         "🔔 <b>Підписки:</b>\n"
