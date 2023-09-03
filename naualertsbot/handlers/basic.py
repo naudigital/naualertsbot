@@ -14,7 +14,7 @@ from aiogram.filters.chat_member_updated import (
 from dependency_injector.wiring import Provide, inject
 
 from naualertsbot.adminutils import check_bot_admin
-from naualertsbot.stats import update_stats
+from naualertsbot.stats import update_pm_stats, update_stats
 from naualertsbot.texts import get_raw_text
 
 if TYPE_CHECKING:
@@ -61,6 +61,7 @@ async def start(
     """
     me = await bot.me()
     if message.chat.type == "private":
+        await update_pm_stats(message.chat)
         await message.answer(
             get_raw_text("basic.start"),
             reply_markup=types.InlineKeyboardMarkup(

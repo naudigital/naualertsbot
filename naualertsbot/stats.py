@@ -5,7 +5,7 @@ from aiogram.exceptions import TelegramForbiddenError
 from dependency_injector.wiring import Provide, inject
 
 from naualertsbot.adminutils import check_bot_admin
-from naualertsbot.models import ChatStats
+from naualertsbot.models import ChatStats, PMChatStats
 
 if TYPE_CHECKING:
     from aiogram import Bot
@@ -48,6 +48,34 @@ async def update_stats(
 
 
 @inject
+async def update_pm_stats(
+    chat: "Chat",
+    bot: "Bot" = Provide["bot_context.bot"],
+    redis: "Redis[Any]" = Provide["db.redis"],
+) -> None:
+    """Update stats in Redis.
+
+    Args:
+        chat: Chat instance.
+        bot: Bot instance.
+        redis: Redis instance.
+    """
+    if chat.type != "private":
+        return
+
+    await redis.hset(
+        "pm_stats",
+        str(chat.id),
+        json.dumps(
+            {
+                "name": chat.first_name,
+                "username": chat.username,
+            },
+        ),
+    )
+
+
+@inject
 async def get_stats(
     redis: "Redis[Any]" = Provide["db.redis"],
 ) -> dict[int, ChatStats]:
@@ -65,6 +93,28 @@ async def get_stats(
         stats_dict = json.loads(value)
         stats_dict["chat_id"] = int(key)
         stats_obj[int(key)] = ChatStats(**stats_dict)
+
+    return stats_obj
+
+
+@inject
+async def get_pm_stats(
+    redis: "Redis[Any]" = Provide["db.redis"],
+) -> dict[int, PMChatStats]:
+    """Get stats from Redis.
+
+    Args:
+        redis: Redis instance.
+
+    Returns:
+        Stats dict.
+    """
+    stats: dict[str, str] = await redis.hgetall("pm_stats")
+    stats_obj: dict[int, PMChatStats] = {}
+    for key, value in stats.items():  # noqa: WPS110
+        stats_dict = json.loads(value)
+        stats_dict["chat_id"] = int(key)
+        stats_obj[int(key)] = PMChatStats(**stats_dict)
 
     return stats_obj
 
