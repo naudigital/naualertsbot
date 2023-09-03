@@ -74,3 +74,9 @@ class ChatStats(BaseModel):
     username: str | None
     members: int
     admin_rights: bool
+
+
+class PMChatStats(BaseModel):
+    chat_id: int
+    name: str
+    username: str | None

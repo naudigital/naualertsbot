@@ -1,3 +1,4 @@
+import shlex
 from datetime import datetime
 from logging import getLogger
 from typing import TYPE_CHECKING, cast
@@ -7,7 +8,7 @@ from aiogram.filters import Command
 from dependency_injector.wiring import Provide, inject
 
 from naualertsbot.models import AlarmType, Alert, Status
-from naualertsbot.stats import get_stats
+from naualertsbot.stats import get_pm_stats, get_stats
 from naualertsbot.texts import get_text
 
 if TYPE_CHECKING:
@@ -20,6 +21,8 @@ logger = getLogger(__name__)
 
 router = Router()
 IMGFILE = types.FSInputFile("assets/map.jpg")
+
+PAGER_MAX_PAGES = 25
 
 DEBUG_PUSH_ALLOWED = False
 
@@ -121,6 +124,40 @@ async def stats(
     if message.from_user.id not in cast(list[int], config["admins"]):
         return
 
+    if not message.text:
+        return
+
+    match shlex.split(message.text.strip().lower())[1:]:
+        case ["chat"]:
+            await _send_chat_stats(message)
+            return
+        case ["pm"]:
+            await _send_pm_stats(message)
+            return
+        case _:
+            pass  # noqa: WPS420
+
+    chat_stats = await get_stats()
+    pm_stats = await get_pm_stats()
+
+    await message.answer(
+        f"📊 <b>Статистика</b>\n\n"
+        f"👥 <b>Групи:</b> <code>{len(chat_stats)}</code>\n"
+        f"👤 <b>Приватні чати:</b> <code>{len(pm_stats)}</code>",
+    )
+
+
+@inject
+async def _send_chat_stats(
+    message: types.Message,
+    bot: "Bot" = Provide["bot_context.bot"],
+) -> None:
+    """Send chat stats.
+
+    Args:
+        message: Message instance.
+        bot: Bot instance.
+    """
     chat_stats = await get_stats()
 
     lines: list[str] = []
@@ -136,4 +173,54 @@ async def stats(
         lines.append(f"  | <b>Адмін:</b> <code>{chat_stat.admin_rights}</code>")
         lines.append("")
 
-    await message.answer("\n".join(lines))
+    if not lines:
+        lines.append("Немає активних груп")
+
+    if len(lines) > PAGER_MAX_PAGES:
+        chunks = [
+            lines[i : i + PAGER_MAX_PAGES]  # noqa: E203
+            for i in range(0, len(lines), PAGER_MAX_PAGES)  # noqa: WPS111
+        ]
+        for chunk in chunks:
+            await message.answer("\n".join(chunk))
+    else:
+        await message.answer("\n".join(lines))
+
+
+@inject
+async def _send_pm_stats(
+    message: types.Message,
+    bot: "Bot" = Provide["bot_context.bot"],
+) -> None:
+    """Send PM stats.
+
+    Args:
+        message: Message instance.
+        bot: Bot instance.
+    """
+    pm_stats = await get_pm_stats()
+
+    lines: list[str] = []
+
+    for pm_stat in pm_stats.values():
+        lines.append(f"- <b>{pm_stat.name}</b> (<code>{pm_stat.chat_id}</code>): ")
+        if pm_stat.username:
+            username = f"@{pm_stat.username}"
+        else:
+            username = "<i>немає</i>"
+        lines.append(f"  | <b>Нік:</b> {username}")
+        lines.append(f"  | <b>Ім'я:</b> {pm_stat.name}")
+        lines.append("")
+
+    if not lines:
+        lines.append("Немає активних приватних чатів")
+
+    if len(lines) > PAGER_MAX_PAGES:
+        chunks = [
+            lines[i : i + PAGER_MAX_PAGES]  # noqa: E203
+            for i in range(0, len(lines), PAGER_MAX_PAGES)  # noqa: WPS111
+        ]
+        for chunk in chunks:
+            await message.answer("\n".join(chunk))
+    else:
+        await message.answer("\n".join(lines))
