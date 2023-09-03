@@ -1,7 +1,7 @@
 import shlex
 from datetime import datetime
 from logging import getLogger
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, cast, Any
 
 from aiogram import Router, types
 from aiogram.filters import Command
@@ -14,6 +14,7 @@ from naualertsbot.texts import get_text
 if TYPE_CHECKING:
     from aiogram import Bot
     from dependency_injector.providers import Configuration
+    from redis.asyncio import Redis
 
     from naualertsbot.services.alerts import AlertsService
 
@@ -111,6 +112,7 @@ async def trigger(
 async def stats(
     message: types.Message,
     config: "Configuration" = Provide["bot_context.config"],
+    redis: "Redis[Any]" = Provide["db.redis"],
 ) -> None:
     """Get stats.
 
@@ -140,10 +142,17 @@ async def stats(
     chat_stats = await get_stats()
     pm_stats = await get_pm_stats()
 
+    alerts_subscription_count = await redis.scard("subscribers:alerts")
+    weeks_subscription_count = await redis.scard("subscribers:weeks")
+
     await message.answer(
         f"📊 <b>Статистика</b>\n\n"
+        f"👤 <b>Приватні чати:</b> <code>{len(pm_stats)}</code>"
         f"👥 <b>Групи:</b> <code>{len(chat_stats)}</code>\n"
-        f"👤 <b>Приватні чати:</b> <code>{len(pm_stats)}</code>",
+        "\n"
+        "🔔 <b>Підписки:</b>\n"
+        f"  | <b>Тривога:</b> <code>{alerts_subscription_count}</code>\n"
+        f"  | <b>Тижні:</b> <code>{weeks_subscription_count}</code>\n",
     )
 
 
