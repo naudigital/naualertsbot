@@ -91,7 +91,7 @@ async def getweek(
     elif weekday in {5, 6}:
         response = await message.answer(
             f"📒 <b>Закінчується {week_number.value}-й тиждень.</b>\n"
-            f"    З понеділка буде {week_number.invert().value}-й тиждень."
+            f"    З понеділка буде {week_number.invert().value}-й тиждень.\n"
             "\n"
             "⏰ Початок та кінець пар:\n"
             "• 1 пара - 8.00 - 9.35\n"
