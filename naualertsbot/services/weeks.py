@@ -142,8 +142,7 @@ class WeeksService:  # noqa: WPS306
             "• 6 пара - 17.10 - 18.45\n"
             "\n"
             "• • • • • • • • • • • • • • • • • • •\n"
-            "<i>Надіслано ботом <b>@naualerts_bot</b>\n"
-            "(повідомлення видалиться автоматично через 30 сек)</i>"
+            "<i>Надіслано ботом <b>@naualerts_bot</b></i>\n"
         )
         for chat_id in await redis.smembers("subscribers:weeks"):
             try:

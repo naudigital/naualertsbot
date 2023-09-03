@@ -1,3 +1,4 @@
+import asyncio
 import shlex
 from datetime import datetime
 from logging import getLogger
@@ -193,6 +194,7 @@ async def _send_chat_stats(
         ]
         for chunk in chunks:
             await message.answer("\n".join(chunk))
+            await asyncio.sleep(1)
     else:
         await message.answer("\n".join(lines))
 
@@ -232,5 +234,6 @@ async def _send_pm_stats(
         ]
         for chunk in chunks:
             await message.answer("\n".join(chunk))
+            await asyncio.sleep(1)
     else:
         await message.answer("\n".join(lines))
