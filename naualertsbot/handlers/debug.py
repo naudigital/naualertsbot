@@ -1,17 +1,17 @@
 import asyncio
 import shlex
-import pytz
 from datetime import datetime
 from logging import getLogger
 from typing import TYPE_CHECKING, Any, cast
 
+import pytz
 from aiogram import Router, types
 from aiogram.filters import Command
 from dependency_injector.wiring import Provide, inject
 
 from naualertsbot.models import AlarmType, Alert, Status
 from naualertsbot.stats import get_pm_stats, get_stats
-from naualertsbot.texts import get_text, EDUCATIONAL_RANGE
+from naualertsbot.texts import EDUCATIONAL_RANGE, get_text
 
 if TYPE_CHECKING:
     from aiogram import Bot
