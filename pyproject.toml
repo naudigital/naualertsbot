@@ -13,7 +13,7 @@ naualertsbot = "naualertsbot.__main__:poetry_main"
 python = "^3.11"
 aiogram = { version = "^3.0.0", allow-prereleases = true }
 aiohttp = "^3.8.5"
-redis = {extras = ["hiredis"], version = "^4.5.5"}
+redis = {extras = ["hiredis"], version = "^5.0.0"}
 dependency-injector = "^4.41.0"
 python-dotenv = "^1.0.0"
 coloredlogs = "^15.0.1"
