@@ -51,7 +51,7 @@ def get_text(model: "Alert", previous_model: "Alert | None") -> str:
         text = texts["unknown"][alarm_status]
 
     additional_text = texts.get("additional_info", {}).get(text_type, None)
-    if additional_text is not None:
+    if additional_text is not None and alarm_status == "activate":
         text += "\n\n" + additional_text  # noqa: WPS336; intented
 
     return text.format(
