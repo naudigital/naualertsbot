@@ -186,6 +186,10 @@ async def settings_action(
         ),
     )
 
+    if isinstance(query.message, types.InaccessibleMessage):
+        await query.answer("❌ Помилка!\nЦе повідомлення недоступне.")
+        return
+    
     await query.answer()
     await query.message.edit_text(
         "🔧 <b>Налаштування</b>\n\n"
