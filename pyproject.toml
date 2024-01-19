@@ -28,7 +28,7 @@ isort = "^5.10.1"
 mypy = "^1.0.0"
 wemake-python-styleguide = { git = "https://github.com/wemake-services/wemake-python-styleguide.git" }
 pre-commit = "^3.3.3"
-flake8 = "^6.1.0"
+flake8 = "^7.0.0"
 types-redis = "^4.5.5.2"
 types-pytz = "^2023.3.0.0"
 types-pyyaml = "^6.0.12.10"
