@@ -23,6 +23,7 @@ logger = getLogger(__name__)
 
 IMGFILE_EDUCATIONAL = types.FSInputFile("assets/map_educational.jpg")
 IMGFILE_CAMPUS = types.FSInputFile("assets/map_campus.jpg")
+VIDFILE_DEACTIVATE = types.FSInputFile("assets/deactivate.mp4")
 
 
 class WorkerService:  # noqa: WPS306
@@ -144,7 +145,4 @@ class WorkerService:  # noqa: WPS306
                 caption=text,
             )
         else:
-            await bot.send_message(
-                chat_id,
-                text,
-            )
+            await bot.send_video(chat_id, VIDFILE_DEACTIVATE, caption=text)

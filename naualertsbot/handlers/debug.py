@@ -10,6 +10,11 @@ from aiogram.filters import Command
 from dependency_injector.wiring import Provide, inject
 
 from naualertsbot.models import AlarmType, Alert, Status
+from naualertsbot.services.worker import (
+    IMGFILE_CAMPUS,
+    IMGFILE_EDUCATIONAL,
+    VIDFILE_DEACTIVATE,
+)
 from naualertsbot.stats import get_pm_stats, get_stats
 from naualertsbot.texts import EDUCATIONAL_RANGE, get_text
 
@@ -23,9 +28,6 @@ if TYPE_CHECKING:
 logger = getLogger(__name__)
 
 router = Router()
-
-IMGFILE_EDUCATIONAL = types.FSInputFile("assets/map_educational.jpg")
-IMGFILE_CAMPUS = types.FSInputFile("assets/map_campus.jpg")
 
 PAGER_MAX_PAGES = 25
 
@@ -110,9 +112,10 @@ async def trigger(
             caption=get_text(alert, None),
         )
     else:
-        await bot.send_message(
+        await bot.send_video(
             message.chat.id,
-            get_text(alert, None),
+            VIDFILE_DEACTIVATE,
+            caption=get_text(alert, None),
         )
 
 
