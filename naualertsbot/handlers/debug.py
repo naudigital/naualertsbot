@@ -10,13 +10,13 @@ from aiogram.filters import Command
 from dependency_injector.wiring import Provide, inject
 
 from naualertsbot.models import AlarmType, Alert, Status
-from naualertsbot.stats import get_pm_stats, get_stats
-from naualertsbot.texts import EDUCATIONAL_RANGE, get_text
 from naualertsbot.services.worker import (
     IMGFILE_CAMPUS,
     IMGFILE_EDUCATIONAL,
     VIDFILE_DEACTIVATE,
 )
+from naualertsbot.stats import get_pm_stats, get_stats
+from naualertsbot.texts import EDUCATIONAL_RANGE, get_text
 
 if TYPE_CHECKING:
     from aiogram import Bot
