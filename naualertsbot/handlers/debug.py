@@ -46,6 +46,7 @@ async def trigger(
     bot: "Bot" = Provide["bot_context.bot"],
     alerts_service: "AlertsService" = Provide["services.alerts"],
     config: "Configuration" = Provide["bot_context.config"],
+    redis: "Redis[Any]" = Provide["db.redis"],
 ) -> None:
     """Trigger alert.
 
@@ -54,6 +55,7 @@ async def trigger(
         bot: Bot instance.
         alerts_service: Alerts service instance.
         config: Bot configuration instance.
+        redis: Redis instance.
     """
     if not message.from_user:
         return
@@ -112,11 +114,14 @@ async def trigger(
             caption=get_text(alert, None),
         )
     else:
-        await bot.send_video(
-            message.chat.id,
-            VIDFILE_DEACTIVATE,
-            caption=get_text(alert, None),
-        )
+        if await redis.sismember("features:deactivation_banger", message.chat.id):
+            await bot.send_video(
+                message.chat.id,
+                VIDFILE_DEACTIVATE,
+                caption=get_text(alert, None),
+            )
+        else:
+            await bot.send_message(message.chat.id, get_text(alert, None))
 
 
 @router.message(Command("stats"))

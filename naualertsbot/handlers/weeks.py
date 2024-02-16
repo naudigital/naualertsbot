@@ -1,14 +1,12 @@
 import asyncio
-from contextlib import suppress
 from logging import getLogger
 from typing import TYPE_CHECKING, cast
 
 from aiogram import Router, types
-from aiogram.exceptions import TelegramBadRequest, TelegramForbiddenError
 from aiogram.filters import Command
 from dependency_injector.wiring import Provide, inject
 
-from naualertsbot.adminutils import check_bot_admin
+from naualertsbot.adminutils import check_bot_admin, delete_delayed
 from naualertsbot.services.weeks import WeeksService, get_current_date
 from naualertsbot.stats import update_stats
 from naualertsbot.texts import get_raw_text
@@ -24,19 +22,6 @@ router = Router()
 CALENDAR_FILE = types.FSInputFile("assets/calendar.jpg")
 SHELTER_EDU_FILE = types.FSInputFile("assets/map_educational.jpg")
 SHELTER_CAMPUS_FILE = types.FSInputFile("assets/map_campus.jpg")
-
-
-async def delete_delayed(messages: list[types.Message], delay: int) -> None:
-    """Delete messages after delay.
-
-    Args:
-        messages: List of messages to delete.
-        delay: Delay in seconds.
-    """
-    await asyncio.sleep(delay)
-    for message in messages:
-        with suppress(TelegramBadRequest, TelegramForbiddenError):
-            await message.delete()
 
 
 @router.message(Command("week"))
