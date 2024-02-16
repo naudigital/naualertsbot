@@ -33,7 +33,6 @@ async def init(
         app: Application instance.
         config: Configuration instance.
     """
-    bot.parse_mode = "HTML"
     dp.include_router(router)
 
     base_url = cast(str, config["base_url"])
