@@ -124,6 +124,7 @@ class WorkerService:  # noqa: WPS306
         text: str,
         alert_status: Status,
         bot: "Bot" = Provide["bot_context.bot"],
+        redis: "Redis[Any]" = Provide["db.redis"],
     ) -> None:
         """Send alert to chat.
 
@@ -132,6 +133,7 @@ class WorkerService:  # noqa: WPS306
             text: Alert text.
             alert_status: Alert status.
             bot: Bot instance.
+            redis: Redis client instance.
         """
         if alert_status == Status.ACTIVATE:
             now = datetime.now(pytz.timezone("Europe/Kiev"))
@@ -145,4 +147,7 @@ class WorkerService:  # noqa: WPS306
                 caption=text,
             )
         else:
-            await bot.send_video(chat_id, VIDFILE_DEACTIVATE, caption=text)
+            if await redis.sismember("features:deactivation_banger", chat_id):
+                await bot.send_video(chat_id, VIDFILE_DEACTIVATE, caption=text)
+            else:
+                await bot.send_message(chat_id, text)

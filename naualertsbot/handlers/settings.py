@@ -10,6 +10,7 @@ from aiogram.filters.callback_data import CallbackData
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from dependency_injector.wiring import Provide, inject
 
+from naualertsbot.adminutils import delete_delayed
 from naualertsbot.stats import update_stats
 
 if TYPE_CHECKING:
@@ -19,6 +20,12 @@ if TYPE_CHECKING:
 logger = getLogger(__name__)
 
 router = Router()
+
+AVAILABLE_FEATURES = MappingProxyType(
+    {
+        "deactivation_banger": "Жосткий бенгер на відбій тривоги",
+    },
+)
 
 
 class SettingsAction(StrEnum):
@@ -197,3 +204,62 @@ async def settings_action(
         "Використовуйте кнопки нижче.",
         reply_markup=builder.as_markup(),
     )
+
+
+@router.message(Command("feat"))
+@inject
+async def feat(
+    message: types.Message,
+    bot: "Bot" = Provide["bot_context.bot"],
+    redis: "Redis[Any]" = Provide["db.redis"],
+) -> None:
+    """Show available AB features.
+
+    Args:
+        message: Message instance.
+        bot: Bot instance.
+        redis: Redis instance.
+    """
+    if message.chat.type == "private":
+        await message.answer("❌ <b>Помилка!</b>\nЦя команда доступна тільки в групах.")
+        return
+
+    if message.chat.type not in {"group", "supergroup"}:
+        return
+
+    await update_stats(message.chat)
+
+    if not message.text:
+        return
+
+    if not message.from_user:
+        return
+
+    chat_member = await bot.get_chat_member(message.chat.id, message.from_user.id)
+    if chat_member.status not in {"administrator", "creator"}:
+        return
+
+    args = message.text.split(maxsplit=1)
+    if len(args) != 3:
+        await message.delete()
+        return
+
+    action = args[1].strip().lower()
+    feature = args[2].strip().lower()
+
+    if action not in {"enable", "disable"}:
+        await message.delete()
+        return
+
+    if feature not in AVAILABLE_FEATURES:
+        await message.delete()
+        return
+
+    if action == "enable":
+        await redis.sadd(f"features:{feature}", message.chat.id)
+    elif action == "disable":
+        await redis.srem(f"features:{feature}", message.chat.id)
+
+    answer = await message.answer("✅ Успішно")
+
+    await delete_delayed([message, answer], 5)
