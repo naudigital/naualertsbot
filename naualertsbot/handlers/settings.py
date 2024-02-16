@@ -239,7 +239,7 @@ async def feat(
     if chat_member.status not in {"administrator", "creator"}:
         return
 
-    args = message.text.split(maxsplit=1)
+    args = message.text.split(maxsplit=2)
     if len(args) != 3:
         await message.delete()
         return
