@@ -13,9 +13,9 @@ from aiogram.filters.chat_member_updated import (
 )
 from dependency_injector.wiring import Provide, inject
 
-from naualertsbot.adminutils import check_bot_admin
 from naualertsbot.stats import update_pm_stats, update_stats
 from naualertsbot.texts import get_raw_text
+from naualertsbot.utils import check_bot_admin
 
 if TYPE_CHECKING:
     from aiogram import Bot

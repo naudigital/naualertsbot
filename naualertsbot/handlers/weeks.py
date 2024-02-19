@@ -6,10 +6,10 @@ from aiogram import Router, types
 from aiogram.filters import Command
 from dependency_injector.wiring import Provide, inject
 
-from naualertsbot.adminutils import check_bot_admin, delete_delayed
 from naualertsbot.services.weeks import WeeksService, get_current_date
 from naualertsbot.stats import update_stats
 from naualertsbot.texts import get_raw_text
+from naualertsbot.utils import check_bot_admin, delete_delayed
 
 if TYPE_CHECKING:
     from aiogram import Bot

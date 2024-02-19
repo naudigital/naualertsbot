@@ -4,8 +4,8 @@ from typing import TYPE_CHECKING, Any
 from aiogram.exceptions import TelegramForbiddenError
 from dependency_injector.wiring import Provide, inject
 
-from naualertsbot.adminutils import check_bot_admin
 from naualertsbot.models import ChatStats, PMChatStats
+from naualertsbot.utils import check_bot_admin
 
 if TYPE_CHECKING:
     from aiogram import Bot
