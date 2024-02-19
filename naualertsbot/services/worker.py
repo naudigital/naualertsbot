@@ -11,6 +11,7 @@ from dependency_injector.wiring import Provide, inject
 from naualertsbot.models import Alert, Status
 from naualertsbot.stats import migrate_chat, update_stats
 from naualertsbot.texts import EDUCATIONAL_RANGE, get_text
+from naualertsbot.utils import check_settings
 
 if TYPE_CHECKING:
     from aiogram import Bot
@@ -53,7 +54,12 @@ class WorkerService:  # noqa: WPS306
                 break
 
             logger.info("Got alert: %s", alert)
-            await self._send_alert(alert, alerts_service.previous_alert)
+            if await check_settings("alerts"):
+                await self._send_alert(alert, alerts_service.previous_alert)
+            else:
+                logger.info(
+                    "Got new alert, but alerts notifications are disabled by global settings",
+                )
             alerts_service.processing_done()
 
         if alerts_service.qsize < 1:
@@ -71,7 +77,12 @@ class WorkerService:  # noqa: WPS306
                 continue
 
             logger.info("Got alert: %s", alert)
-            await self._send_alert(alert, alerts_service.previous_alert)
+            if await check_settings("alerts"):
+                await self._send_alert(alert, alerts_service.previous_alert)
+            else:
+                logger.info(
+                    "Got new alert, but alerts notifications are disabled by global settings",
+                )
             alerts_service.processing_done()
 
         logger.info("Worker stopped")

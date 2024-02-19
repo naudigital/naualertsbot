@@ -1,7 +1,7 @@
 from enum import StrEnum
 from logging import getLogger
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from aiogram import Router, types
 from aiogram.exceptions import TelegramForbiddenError
@@ -10,11 +10,12 @@ from aiogram.filters.callback_data import CallbackData
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from dependency_injector.wiring import Provide, inject
 
-from naualertsbot.adminutils import delete_delayed
 from naualertsbot.stats import update_stats
+from naualertsbot.utils import delete_delayed
 
 if TYPE_CHECKING:
     from aiogram import Bot
+    from dependency_injector.providers import Configuration
     from redis.asyncio import Redis
 
 logger = getLogger(__name__)
@@ -204,6 +205,60 @@ async def settings_action(
         "Використовуйте кнопки нижче.",
         reply_markup=builder.as_markup(),
     )
+
+
+@router.message(Command("globalsettings"))
+@inject
+async def global_settings(
+    message: types.Message,
+    redis: "Redis[Any]" = Provide["db.redis"],
+    config: "Configuration" = Provide["config"],
+) -> None:
+    """Manage global settings. For admins only.
+
+    Args:
+        message: Message instance.
+        redis: Redis instance.
+        config: Configuration instance.
+    """
+    if not message.from_user:
+        return
+
+    if message.from_user.id not in cast(list[int], config["admins"]):
+        return
+
+    if not message.text:
+        return
+
+    args = message.text.split(" ")
+
+    if len(args) != 3:
+        return
+
+    match args[1:]:
+        case ["show"]:
+            text = "🔧 <b>Глобальні налаштування</b>\n\n"
+
+            for name, value in (  # noqa: WPS519, WPS352, WPS110
+                await redis.hgetall("settings")
+            ).items():
+                text += f"{name}: {value}\n"  # noqa: WPS336
+
+            await message.answer(text)
+            return
+        case ["enable", setting_name]:
+            await redis.hset("settings", setting_name, "true")
+            logger.info("Enabled setting: %s", setting_name)
+            await message.answer("✅ Успішно")
+            return
+        case ["disable", setting_name]:
+            await redis.hset("settings", setting_name, "false")
+            logger.info("Disabled setting: %s", setting_name)
+            await message.answer("✅ Успішно")
+            return
+        case _:
+            await message.answer("❌ Помилка!\nНевідома команда.")
+            return
 
 
 @router.message(Command("feat"))
