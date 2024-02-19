@@ -1,4 +1,5 @@
 """Main module."""
+
 import asyncio
 from logging import getLogger
 from typing import TYPE_CHECKING, Any, NoReturn, cast
@@ -47,7 +48,7 @@ async def save_alerts_state(
             alerts.append(alert)
 
     for alert in alerts:  # noqa: WPS440
-        await redis.lpush("alerts", alert.json())
+        await redis.lpush("alerts", alert.model_dump_json())
 
 
 @inject
@@ -64,7 +65,7 @@ async def load_alerts_state(
     alerts = await redis.lrange("alerts", 0, -1)
     for alert in alerts:
         try:
-            await alerts_service.trigger_alert(Alert.parse_raw(alert))
+            await alerts_service.trigger_alert(Alert.model_validate_json(alert))
         except (ValidationError, TypeError):
             logger.warning("Invalid alert in Redis: %s", alert)
 
