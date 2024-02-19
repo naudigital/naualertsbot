@@ -1,8 +1,13 @@
 import asyncio
 from contextlib import suppress
+from typing import TYPE_CHECKING, Any
 
 from aiogram import types
 from aiogram.exceptions import TelegramBadRequest, TelegramForbiddenError
+from dependency_injector.wiring import Provide, inject
+
+if TYPE_CHECKING:
+    from redis.asyncio import Redis
 
 
 def check_bot_admin(
@@ -51,3 +56,17 @@ async def delete_delayed(messages: list[types.Message], delay: int) -> None:
     for message in messages:
         with suppress(TelegramBadRequest, TelegramForbiddenError):
             await message.delete()
+
+
+@inject
+async def check_settings(name: str, redis: "Redis[Any]" = Provide["db.redis"]) -> bool:
+    """Check setting.
+
+    Args:
+        redis: Redis instance.
+        name: Setting name.
+
+    Returns:
+        True if setting is enabled.
+    """
+    return (await redis.hget("settings", name)) == b"true"

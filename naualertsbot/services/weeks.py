@@ -10,6 +10,7 @@ from dependency_injector.wiring import Provide, inject
 
 from naualertsbot.models import WeekNumber
 from naualertsbot.stats import migrate_chat, update_stats
+from naualertsbot.utils import check_settings
 
 if TYPE_CHECKING:
     from aiogram import Bot
@@ -70,7 +71,12 @@ class WeeksService:  # noqa: WPS306
             date = get_current_date()
             week_number = get_week_number(date)
             if week_number != last_week_number:
-                await self._send_week(await self.get_week_number())
+                if await check_settings("weeks"):
+                    await self._send_week(await self.get_week_number())
+                else:
+                    logger.info(
+                        "Got new week, but weeks notifications are disabled by global settings",
+                    )
                 last_week_number = week_number
             await asyncio.sleep(1)
 
