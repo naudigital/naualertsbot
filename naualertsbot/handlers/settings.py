@@ -212,7 +212,7 @@ async def settings_action(
 async def global_settings(
     message: types.Message,
     redis: "Redis[Any]" = Provide["db.redis"],
-    config: "Configuration" = Provide["config"],
+    config: "Configuration" = Provide["bot_context.config"],
 ) -> None:
     """Manage global settings. For admins only.
 
