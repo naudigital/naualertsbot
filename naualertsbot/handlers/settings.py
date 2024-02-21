@@ -232,9 +232,6 @@ async def global_settings(
 
     args = message.text.split(" ")
 
-    if len(args) != 3:
-        return
-
     match args[1:]:
         case ["show"]:
             text = "🔧 <b>Глобальні налаштування</b>\n\n"
