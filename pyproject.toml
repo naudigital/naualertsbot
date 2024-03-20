@@ -12,7 +12,7 @@ naualertsbot = "naualertsbot.__main__:poetry_main"
 [tool.poetry.dependencies]
 python = "^3.11"
 aiogram = { version = "^3.0.0", allow-prereleases = true }
-aiohttp = "^3.8.5"
+aiohttp = "^3.9.2"
 redis = {extras = ["hiredis"], version = "^5.0.1"}
 dependency-injector = "^4.41.0"
 python-dotenv = "^1.0.0"
@@ -23,7 +23,7 @@ pytz = "^2023.3"
 sentry-sdk = "^1.30.0"
 
 [tool.poetry.group.dev.dependencies]
-black = "^23.7.0"
+black = "^24.3.0"
 isort = "^5.10.1"
 mypy = "^1.0.0"
 wemake-python-styleguide = { git = "https://github.com/wemake-services/wemake-python-styleguide.git" }
