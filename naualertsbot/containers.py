@@ -1,4 +1,5 @@
 from aiogram import Bot, Dispatcher
+from aiogram.client.default import DefaultBotProperties
 from aiohttp import web
 from dependency_injector import containers, providers
 
@@ -34,7 +35,7 @@ class BotContext(containers.DeclarativeContainer):
     bot = providers.Singleton(
         Bot,
         token=config.token,
-        parse_mode="HTML",
+        default=DefaultBotProperties(parse_mode='HTML'),
     )
 
     dispatcher = providers.Singleton(
