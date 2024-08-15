@@ -239,7 +239,9 @@ async def global_settings(
             for name, value in (  # noqa: WPS519, WPS352, WPS110
                 await redis.hgetall("settings")
             ).items():
-                text += f"{name}: {value}\n"  # noqa: WPS336
+                text += (
+                    f"{name.decode()}: <code>{value.decode()}</code>\n"  # noqa: WPS336
+                )
 
             await message.answer(text)
             return
