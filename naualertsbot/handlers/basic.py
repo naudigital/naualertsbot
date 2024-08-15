@@ -15,7 +15,7 @@ from dependency_injector.wiring import Provide, inject
 
 from naualertsbot.stats import update_pm_stats, update_stats
 from naualertsbot.texts import get_raw_text
-from naualertsbot.utils import check_bot_admin
+from naualertsbot.utils import check_bot_admin, check_settings
 
 if TYPE_CHECKING:
     from aiogram import Bot
@@ -123,6 +123,39 @@ async def stop(
         "✅ <b>Ви відписались від розсилки!</b>\nВсього найкращого🫡",
     )
     await message.chat.leave()
+
+
+@router.message()
+@inject
+async def catch_all(
+    message: types.Message,
+    bot: "Bot" = Provide["bot_context.bot"],
+    redis: "Redis[Any]" = Provide["db.redis"],
+) -> None:
+    """Catch-all handler.
+
+    Args:
+        message: Message instance.
+        bot: Bot instance.
+        redis: Redis instance.
+    """
+    if message.chat.type == "private":
+        await update_pm_stats(message.chat)
+        return
+
+    if message.chat.type not in {"group", "supergroup"}:
+        return
+
+    await update_stats(message.chat)
+
+    if await check_settings("subscribe_all", redis):
+        if not await _is_subscribed(message.chat):
+            await redis.sadd("subscribers:alerts", message.chat.id)
+            await redis.sadd("subscribers:weeks", message.chat.id)
+            logger.info(
+                "Group %s was resubscribed according to global autosubscribe rule",
+                message.chat.id,
+            )
 
 
 @router.my_chat_member(
