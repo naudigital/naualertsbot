@@ -128,10 +128,10 @@ async def stop(
 @inject
 async def subscribe_all(
     handler: Callable[  # noqa: WPS221, WPS110, WPS320
-        [types.Update, Dict[str, Any]],
+        [types.Message, Dict[str, Any]],
         Awaitable[Any],
     ],
-    event: types.Update,
+    event: types.Message,
     data: Dict[str, Any],  # noqa: WPS110
     redis: "Redis[Any]" = Provide["db.redis"],
 ) -> Any:
@@ -146,23 +146,26 @@ async def subscribe_all(
     Returns:
         Result of handler.
     """
-    if event.message and event.message.chat:
-        if event.message.chat.type == "private":
-            await update_pm_stats(event.message.chat)
+    if not isinstance(event, types.Message):
+        return await handler(event, data)
+
+    if event and event.chat:
+        if event.chat.type == "private":
+            await update_pm_stats(event.chat)
             return await handler(event, data)
 
-        if event.message.chat.type not in {"group", "supergroup"}:
+        if event.chat.type not in {"group", "supergroup"}:
             return await handler(event, data)
 
-        await update_stats(event.message.chat)
+        await update_stats(event.chat)
 
         if await check_settings("subscribe_all"):
-            if not await _is_subscribed(event.message.chat):
-                await redis.sadd("subscribers:alerts", event.message.chat.id)
-                await redis.sadd("subscribers:weeks", event.message.chat.id)
+            if not await _is_subscribed(event.chat):
+                await redis.sadd("subscribers:alerts", event.chat.id)
+                await redis.sadd("subscribers:weeks", event.chat.id)
                 logger.info(
                     "Group %s was subscribed according to global autosubscribe rule",
-                    event.message.chat.id,
+                    event.chat.id,
                 )
 
     return await handler(event, data)
