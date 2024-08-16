@@ -1,5 +1,5 @@
 from logging import getLogger
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Awaitable, Callable, Dict
 
 from aiogram import Router, types
 from aiogram.filters import Command
@@ -125,37 +125,50 @@ async def stop(
     await message.chat.leave()
 
 
-@router.message()
 @inject
-async def catch_all(
-    message: types.Message,
-    bot: "Bot" = Provide["bot_context.bot"],
+async def subscribe_all(
+    handler: Callable[  # noqa: WPS221, WPS110, WPS320
+        [types.Update, Dict[str, Any]],
+        Awaitable[Any],
+    ],
+    event: types.Update,
+    data: Dict[str, Any],  # noqa: WPS110
     redis: "Redis[Any]" = Provide["db.redis"],
-) -> None:
-    """Catch-all handler.
+) -> Any:
+    """Subscribe all groups to alerts and weeks.
 
     Args:
-        message: Message instance.
-        bot: Bot instance.
+        handler: Handler.
+        event: Update instance.
+        data: Data.
         redis: Redis instance.
+
+    Returns:
+        Result of handler.
     """
-    if message.chat.type == "private":
-        await update_pm_stats(message.chat)
-        return
+    if event.message and event.message.chat:
+        if event.message.chat.type == "private":
+            await update_pm_stats(event.message.chat)
+            return await handler(event, data)
 
-    if message.chat.type not in {"group", "supergroup"}:
-        return
+        if event.message.chat.type not in {"group", "supergroup"}:
+            return await handler(event, data)
 
-    await update_stats(message.chat)
+        await update_stats(event.message.chat)
 
-    if await check_settings("subscribe_all", redis):
-        if not await _is_subscribed(message.chat):
-            await redis.sadd("subscribers:alerts", message.chat.id)
-            await redis.sadd("subscribers:weeks", message.chat.id)
-            logger.info(
-                "Group %s was resubscribed according to global autosubscribe rule",
-                message.chat.id,
-            )
+        if await check_settings("subscribe_all"):
+            if not await _is_subscribed(event.message.chat):
+                await redis.sadd("subscribers:alerts", event.message.chat.id)
+                await redis.sadd("subscribers:weeks", event.message.chat.id)
+                logger.info(
+                    "Group %s was subscribed according to global autosubscribe rule",
+                    event.message.chat.id,
+                )
+
+    return await handler(event, data)
+
+
+router.message.outer_middleware(subscribe_all)  # type: ignore
 
 
 @router.my_chat_member(

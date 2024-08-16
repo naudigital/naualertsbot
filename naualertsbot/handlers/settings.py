@@ -250,7 +250,7 @@ async def global_settings(
             logger.info("Enabled setting: %s", setting_name)
             await message.answer("✅ Успішно")
             return
-        case ["disable", setting_name]:
+        case ["disable", setting_name]:  # noqa: WPS440
             await redis.hset("settings", setting_name, "false")
             logger.info("Disabled setting: %s", setting_name)
             await message.answer("✅ Успішно")

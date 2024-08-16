@@ -35,7 +35,7 @@ class BotContext(containers.DeclarativeContainer):
     bot = providers.Singleton(
         Bot,
         token=config.token,
-        default=DefaultBotProperties(parse_mode='HTML'),
+        default=DefaultBotProperties(parse_mode="HTML"),
     )
 
     dispatcher = providers.Singleton(

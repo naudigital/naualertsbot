@@ -38,7 +38,10 @@ async def bootstrap() -> NoReturn:
     args = parser.parse_args(sys.argv[1:])
     coloredlogs.install(level=args.log_level)  # type: ignore
 
-    logger.info("Running naualertsbot version %s", version(__package__))
+    logger.info(
+        "Running naualertsbot version %s",
+        version(__package__ or "naualertsbot"),
+    )
     logger.info("Loading config from %s", args.config)
 
     if not os.path.isfile(args.config):

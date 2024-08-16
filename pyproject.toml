@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "naualertsbot"
-version = "1.4.4"
+version = "1.4.5"
 description = ""
 authors = ["Stanislav <h3xcode@envs.net>"]
 license = "Apache-2.0"
