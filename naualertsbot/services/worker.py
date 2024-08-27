@@ -1,4 +1,5 @@
 import asyncio
+import random
 from datetime import datetime
 from logging import getLogger
 from typing import TYPE_CHECKING, Any
@@ -25,6 +26,7 @@ logger = getLogger(__name__)
 IMGFILE_EDUCATIONAL = types.FSInputFile("assets/map_educational.png")
 IMGFILE_CAMPUS = types.FSInputFile("assets/map_campus.png")
 VIDFILE_DEACTIVATE = types.FSInputFile("assets/deactivate.mp4")
+DEACTIVATION_BANGER_THRESHOLD = 0.1
 
 
 class WorkerService:  # noqa: WPS306
@@ -158,7 +160,12 @@ class WorkerService:  # noqa: WPS306
                 caption=text,
             )
         else:
-            if await redis.sismember("features:deactivation_banger", chat_id):
+            feat_disabled = await redis.sismember(
+                "features:no_deactivation_banger",
+                chat_id,
+            )
+            random_pass = random.random() < DEACTIVATION_BANGER_THRESHOLD  # noqa: S311
+            if not feat_disabled and random_pass:
                 await bot.send_video(chat_id, VIDFILE_DEACTIVATE, caption=text)
             else:
                 await bot.send_message(chat_id, text)
