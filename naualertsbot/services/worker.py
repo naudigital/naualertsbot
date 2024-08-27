@@ -22,8 +22,8 @@ if TYPE_CHECKING:
 
 logger = getLogger(__name__)
 
-IMGFILE_EDUCATIONAL = types.FSInputFile("assets/map_educational.jpg")
-IMGFILE_CAMPUS = types.FSInputFile("assets/map_campus.jpg")
+IMGFILE_EDUCATIONAL = types.FSInputFile("assets/map_educational.png")
+IMGFILE_CAMPUS = types.FSInputFile("assets/map_campus.png")
 VIDFILE_DEACTIVATE = types.FSInputFile("assets/deactivate.mp4")
 
 
