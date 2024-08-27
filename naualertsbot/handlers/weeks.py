@@ -20,8 +20,8 @@ logger = getLogger(__name__)
 router = Router()
 
 CALENDAR_FILE = types.FSInputFile("assets/calendar.jpg")
-SHELTER_EDU_FILE = types.FSInputFile("assets/map_educational.jpg")
-SHELTER_CAMPUS_FILE = types.FSInputFile("assets/map_campus.jpg")
+SHELTER_EDU_FILE = types.FSInputFile("assets/map_educational.png")
+SHELTER_CAMPUS_FILE = types.FSInputFile("assets/map_campus.png")
 
 
 @router.message(Command("week"))
