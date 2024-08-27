@@ -24,7 +24,7 @@ router = Router()
 
 AVAILABLE_FEATURES = MappingProxyType(
     {
-        "deactivation_banger": "Жосткий бенгер на відбій тривоги",
+        "no_deactivation_banger": "Вимкнути жосткий бенгер на відбій тривоги",
     },
 )
 
