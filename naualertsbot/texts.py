@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 
 
 texts: dict[str, dict[str, str]]
-EDUCATIONAL_RANGE = range(7, 17)  # noqa: WPS432; intented as range from 7:00 to 17:00
+EDUCATIONAL_RANGE = range(8, 20)  # noqa: WPS432; intented as range from 7:00 to 17:00
 
 with open("assets/texts.yaml") as texts_file:
     texts = yaml.safe_load(texts_file)
