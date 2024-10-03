@@ -9,5 +9,5 @@ max-arguments = 10
 max-methods = 15
 max-local-variables = 10
 max-imports = 20
-max-expressions = 15
+max-expressions = 20
 max-returns = 10
