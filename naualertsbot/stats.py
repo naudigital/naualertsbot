@@ -40,7 +40,7 @@ async def update_stats(
             {
                 "name": chat.title,
                 "username": chat.username,
-                "members": (await chat.get_member_count()),
+                "members": (await chat.get_member_count().as_(bot)),
                 "admin_rights": check_bot_admin(me_participant),
             },
         ),
