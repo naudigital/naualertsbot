@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any
 
 import pytz
 from aiogram import types
-from aiogram.exceptions import TelegramForbiddenError, TelegramMigrateToChat
+from aiogram.exceptions import TelegramForbiddenError, TelegramMigrateToChat, TelegramBadRequest
 from dependency_injector.wiring import Provide, inject
 
 from naualertsbot.models import Alert, Status
@@ -26,7 +26,7 @@ logger = getLogger(__name__)
 IMGFILE_EDUCATIONAL = types.FSInputFile("assets/map_educational.png")
 IMGFILE_CAMPUS = types.FSInputFile("assets/map_campus.png")
 VIDFILE_DEACTIVATE = types.FSInputFile("assets/deactivate.mp4")
-DEACTIVATION_BANGER_THRESHOLD = 0.1
+DEACTIVATION_BANGER_THRESHOLD = 0.01
 
 
 class WorkerService:  # noqa: WPS306
@@ -128,6 +128,13 @@ class WorkerService:  # noqa: WPS306
                 await redis.srem("subscribers:alerts", chat_id)
                 await redis.srem("subscribers:weeks", chat_id)
                 await update_stats(types.Chat(id=chat_id, type="supergroup"))
+            except TelegramBadRequest:
+                logger.info("Chat %s blocked bot", chat_id)
+                await redis.srem("subscribers:alerts", chat_id)
+                await redis.srem("subscribers:weeks", chat_id)
+                await update_stats(types.Chat(id=chat_id, type="supergroup"))
+            except Exception as err:  # noqa: W0703
+                logger.exception("Failed to send alert to chat %s: %s", chat_id, err)
             await asyncio.sleep(0.5)
 
     @inject
