@@ -6,7 +6,11 @@ from typing import TYPE_CHECKING, Any
 
 import pytz
 from aiogram import types
-from aiogram.exceptions import TelegramForbiddenError, TelegramMigrateToChat, TelegramBadRequest
+from aiogram.exceptions import (
+    TelegramBadRequest,
+    TelegramForbiddenError,
+    TelegramMigrateToChat,
+)
 from dependency_injector.wiring import Provide, inject
 
 from naualertsbot.models import Alert, Status
@@ -111,7 +115,7 @@ class WorkerService:  # noqa: WPS306
         text = get_text(alert, previous_alert)
 
         for chat_id in await redis.smembers("subscribers:alerts"):
-            try:
+            try:  # noqa: WPS225
                 await self._send_alert_to_chat(chat_id, text, alert.status)
             except TelegramMigrateToChat as err:
                 logger.info("Chat %s migrated to %s", chat_id, err.migrate_to_chat_id)
