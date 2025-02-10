@@ -5,7 +5,11 @@ from typing import TYPE_CHECKING, Any
 
 import pytz
 from aiogram import types
-from aiogram.exceptions import TelegramForbiddenError, TelegramMigrateToChat
+from aiogram.exceptions import (
+    TelegramBadRequest,
+    TelegramForbiddenError,
+    TelegramMigrateToChat,
+)
 from dependency_injector.wiring import Provide, inject
 
 from naualertsbot.models import WeekNumber
@@ -156,6 +160,11 @@ class WeeksService:  # noqa: WPS306
                 await bot.send_message(err.migrate_to_chat_id, text)
             except TelegramForbiddenError:
                 logger.info("Chat %s blocked bot", chat_id)
+                await redis.srem("subscribers:alerts", chat_id)
+                await redis.srem("subscribers:weeks", chat_id)
+                await update_stats(types.Chat(id=chat_id, type="supergroup"))
+            except TelegramBadRequest as err:
+                logger.warn("Failed to send alert to chat %s: %s", chat_id, err)
                 await redis.srem("subscribers:alerts", chat_id)
                 await redis.srem("subscribers:weeks", chat_id)
                 await update_stats(types.Chat(id=chat_id, type="supergroup"))
