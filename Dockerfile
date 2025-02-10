@@ -31,11 +31,18 @@ ENV DEBIAN_FRONTEND=noninteractive \
     PIP_DEFAULT_TIMEOUT=100
 WORKDIR /app
 
+RUN apt-get update && \
+    apt-get install --no-install-recommends -y curl && \
+    rm -rf /var/lib/apt/lists/*
+
 RUN mkdir -p /opt/app
 COPY --from=build /usr/src/app/dist/naualertsbot-*.whl /opt/app
 RUN pip install /opt/app/naualertsbot-*.whl && \
     rm -rf /opt/app
 
 COPY assets /app/assets
+
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8080/healthcheck || exit 1
 
 CMD [ "naualertsbot" ]
