@@ -24,6 +24,8 @@ if TYPE_CHECKING:
 
 logger = getLogger(__name__)
 
+HTTP_PORT = 8080
+
 
 @inject
 async def save_alerts_state(
@@ -72,6 +74,23 @@ async def load_alerts_state(
     await redis.delete("alerts")
 
 
+# implement healthcheck endpoint
+
+HTTP_STATUS_OK = 200
+
+
+async def healthcheck(request: web.Request) -> web.Response:
+    """Healthcheck endpoint.
+
+    Args:
+        request: Request instance.
+
+    Returns:
+        Response instance.
+    """
+    return web.Response(text="OK", status=HTTP_STATUS_OK)
+
+
 @inject
 async def main(  # noqa: WPS210, WPS213
     app: "web.Application" = Provide["http.app"],
@@ -100,8 +119,10 @@ async def main(  # noqa: WPS210, WPS213
     logger.info("Loading alerts state")
     await load_alerts_state()
 
+    app.router.add_get("/healthcheck", healthcheck)
+
     host = cast(str, config.get("host") or "127.0.0.1")
-    port = cast(int, config["port"])
+    port = HTTP_PORT
 
     logger.info("Starting application on %s:%s", host, port)
 
