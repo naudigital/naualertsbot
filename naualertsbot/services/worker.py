@@ -132,8 +132,8 @@ class WorkerService:  # noqa: WPS306
                 await redis.srem("subscribers:alerts", chat_id)
                 await redis.srem("subscribers:weeks", chat_id)
                 await update_stats(types.Chat(id=chat_id, type="supergroup"))
-            except TelegramBadRequest:
-                logger.info("Chat %s blocked bot", chat_id)
+            except TelegramBadRequest as err:
+                logger.warn("Failed to send alert to chat %s: %s", chat_id, err)
                 await redis.srem("subscribers:alerts", chat_id)
                 await redis.srem("subscribers:weeks", chat_id)
             except Exception as err:  # noqa: W0703
