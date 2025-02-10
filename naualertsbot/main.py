@@ -73,6 +73,7 @@ async def load_alerts_state(
 
     await redis.delete("alerts")
 
+
 # implement healthcheck endpoint
 
 HTTP_STATUS_OK = 200
